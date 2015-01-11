@@ -38,4 +38,8 @@ public class Utils {
 
         g.drawString(s, x, y);
     }
+
+    public static boolean hasText(String s) {
+        return s != null && !s.matches("\\s*");
+    }
 }

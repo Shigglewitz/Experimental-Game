@@ -91,6 +91,9 @@ public class OptionsState extends GameState {
                 activeOption = selectedOption;
                 selectedOption = -1;
                 break;
+            case KeyEvent.VK_ESCAPE:
+                exit();
+                break;
             }
         } else {
             options.get(activeOption).setKey(k);
@@ -109,6 +112,10 @@ public class OptionsState extends GameState {
         } else {
             selectedOption--;
         }
+    }
+
+    protected void exit() {
+        gsm.pop();
     }
 
     public static class Option {

@@ -155,7 +155,7 @@ public class MenuState extends GameState {
     }
 
     protected void start() {
-        System.out.println("PLAYER 1 START!");
+        gsm.push(new PeriodicTableState(gsm));
     }
 
     protected void options() {

@@ -8,4 +8,18 @@
     <modules>
         <module>main</module>
     </modules>
+
+    <properties>
+        <junitVersion>4.8.1</junitVersion>
+    </properties>
+
+    <dependencies>
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junitVersion}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
