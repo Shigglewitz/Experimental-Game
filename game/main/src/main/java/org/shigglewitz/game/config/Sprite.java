@@ -1,9 +1,11 @@
 package org.shigglewitz.game.config;
 
 public enum Sprite {
-    CHAR_IDLE(2, "/sprites/playersprites.gif");
+    CHAR_IDLE(2, 1000, "/sprites/playersprites.gif"), FLASHING(2, 300, 50, 50,
+            0, 0, "/sprites/flashing.gif");
 
     private int numImages;
+    private int delay;
     private int width;
     private int height;
     private int xOffset;
@@ -15,14 +17,15 @@ public enum Sprite {
     private static final int DEFAULT_X_OFFSET = 0;
     private static final int DEFAULT_Y_OFFSET = 0;
 
-    private Sprite(int numImages, String path) {
-        this(numImages, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_X_OFFSET,
+    private Sprite(int numImages, int delay, String path) {
+        this(numImages, delay, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_X_OFFSET,
                 DEFAULT_Y_OFFSET, path);
     }
 
-    private Sprite(int numImages, int width, int height, int xOffset,
-            int yOffset, String path) {
+    private Sprite(int numImages, int delay, int width, int height,
+            int xOffset, int yOffset, String path) {
         this.numImages = numImages;
+        this.delay = delay;
         this.width = width;
         this.height = height;
         this.xOffset = xOffset;
@@ -32,6 +35,10 @@ public enum Sprite {
 
     public int getNumImages() {
         return numImages;
+    }
+
+    public int getDelay() {
+        return delay;
     }
 
     public int getWidth() {

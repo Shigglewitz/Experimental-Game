@@ -11,8 +11,8 @@ public class Config {
     }
 
     private String windowTitle = "Window Title";
-    private int width = 640;
-    private int height = 480;
+    private int width = 800;
+    private int height = 600;
     private int scale = 1;
     private int framesPerSecond = 60;
 

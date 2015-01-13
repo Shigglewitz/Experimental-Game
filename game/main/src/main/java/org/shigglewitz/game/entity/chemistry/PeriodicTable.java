@@ -8,8 +8,8 @@ import java.io.InputStreamReader;
 import org.shigglewitz.game.Utils;
 
 public class PeriodicTable {
-    private static final int NUM_PERIODS = 5;
-    private static final int[] ELEMENTS_PER_PERIOD = { 2, 8, 8, 18, 18 };
+    public static final int NUM_PERIODS = 7;
+    private static final int[] ELEMENTS_PER_PERIOD = { 2, 8, 8, 18, 18, 15, 15 };
 
     private Element[][] table;
 
@@ -100,8 +100,6 @@ public class PeriodicTable {
             previousSum += ELEMENTS_PER_PERIOD[i - 1];
         }
         int pos = e.getAtomicNumber() - previousSum - 1;
-        System.out.println("Inserting element " + e.getName() + " at "
-                + (e.getPeriod() - 1) + "," + pos);
         table[e.getPeriod() - 1][pos] = e;
 
     }

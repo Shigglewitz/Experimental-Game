@@ -25,6 +25,9 @@ public class OptionsState extends GameState {
     int selectedOption;
     int activeOption;
 
+    int optionsVerticalOffset;
+    int optionsHeight;
+
     public OptionsState(GameStateManager gsm) {
         super(gsm);
 
@@ -33,7 +36,6 @@ public class OptionsState extends GameState {
 
         optionsColor = Color.LIGHT_GRAY;
         optionsSelectedColor = Color.YELLOW;
-        optionsFont = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
         options = new ArrayList<>();
 
         for (Control c : Control.values()) {
@@ -42,6 +44,16 @@ public class OptionsState extends GameState {
 
         selectedOption = 0;
         activeOption = -1;
+
+        configure();
+    }
+
+    @Override
+    public void configure() {
+        optionsVerticalOffset = config.getHeight() / 8;
+        optionsHeight = config.getHeight() / 25;
+        optionsFont = new Font(Font.SANS_SERIF, Font.PLAIN,
+                config.getWidth() / 30);
     }
 
     @Override
@@ -67,7 +79,8 @@ public class OptionsState extends GameState {
 
             Utils.drawHorizontallyCenteredString(
                     o.getDescription() + " : " + o.displayKey(), g,
-                    100 + i * 10, config.getWidth(), config.getHeight());
+                    optionsVerticalOffset + i * optionsHeight,
+                    config.getWidth(), config.getHeight());
         }
     }
 

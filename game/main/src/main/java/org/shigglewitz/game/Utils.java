@@ -1,5 +1,6 @@
 package org.shigglewitz.game;
 
+import java.awt.AlphaComposite;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -37,6 +38,11 @@ public class Utils {
         }
 
         g.drawString(s, x, y);
+    }
+
+    public static AlphaComposite makeComposite(float alpha) {
+        int type = AlphaComposite.SRC_OVER;
+        return (AlphaComposite.getInstance(type, alpha));
     }
 
     public static boolean hasText(String s) {

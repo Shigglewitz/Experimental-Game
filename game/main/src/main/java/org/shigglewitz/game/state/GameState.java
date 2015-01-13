@@ -2,9 +2,10 @@ package org.shigglewitz.game.state;
 
 import org.shigglewitz.game.GameObject;
 import org.shigglewitz.game.config.Config;
+import org.shigglewitz.game.config.Configurable;
 import org.shigglewitz.game.config.Resources;
 
-public abstract class GameState implements GameObject {
+public abstract class GameState implements GameObject, Configurable {
     protected Config config = Config.getConfig();
     protected Resources resources = Resources.getResources();
 

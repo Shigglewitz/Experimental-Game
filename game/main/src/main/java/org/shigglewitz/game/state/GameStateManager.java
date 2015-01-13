@@ -4,8 +4,9 @@ import java.awt.Graphics2D;
 import java.util.Stack;
 
 import org.shigglewitz.game.GameObject;
+import org.shigglewitz.game.config.Configurable;
 
-public class GameStateManager implements GameObject {
+public class GameStateManager implements GameObject, Configurable {
     private Stack<GameState> states;
 
     public GameStateManager() {
@@ -41,5 +42,12 @@ public class GameStateManager implements GameObject {
 
     public void keyReleased(int k) {
         states.peek().keyReleased(k);
+    }
+
+    @Override
+    public void configure() {
+        for (GameState gs : states) {
+            gs.configure();
+        }
     }
 }

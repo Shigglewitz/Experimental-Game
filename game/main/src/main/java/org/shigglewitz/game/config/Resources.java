@@ -59,8 +59,9 @@ public class Resources {
 
             BufferedImage[] ret = new BufferedImage[s.getNumImages()];
             for (int i = 0; i < ret.length; i++) {
-                ret[i] = spriteSheet.getSubimage(s.getxOffset(), s.getyOffset()
-                        + (i * s.getWidth()), s.getWidth(), s.getHeight());
+                ret[i] = spriteSheet.getSubimage(
+                        s.getxOffset() + (i * s.getWidth()), s.getyOffset(),
+                        s.getWidth(), s.getHeight());
             }
 
             return ret;

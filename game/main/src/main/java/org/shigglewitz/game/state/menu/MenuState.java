@@ -58,18 +58,25 @@ public class MenuState extends GameState {
 
         bgColor = Color.CYAN;
 
-        titleVerticalOffset = 50;
         titleColor = Color.BLACK;
-        titleFont = new Font("Gothic", Font.BOLD, 16);
         title = "Experimental Game";
 
         menuColor = Color.GRAY;
         menuSelectedColor = Color.DARK_GRAY;
-        menuFont = new Font("Arial", Font.PLAIN, 10);
-        menuVerticalOffset = 100;
-        menuVerticalSize = 15;
+
+        configure();
 
         selected = MenuOption.START;
+    }
+
+    @Override
+    public void configure() {
+        titleVerticalOffset = config.getHeight() / 7;
+        titleFont = new Font("Gothic", Font.BOLD, config.getWidth() / 15);
+
+        menuFont = new Font("Arial", Font.PLAIN, config.getWidth() / 24);
+        menuVerticalOffset = config.getHeight() / 3;
+        menuVerticalSize = config.getHeight() / 15;
     }
 
     @Override
@@ -165,5 +172,4 @@ public class MenuState extends GameState {
     protected void exit() {
         System.exit(0);
     }
-
 }
