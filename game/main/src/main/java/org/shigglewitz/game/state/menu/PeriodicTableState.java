@@ -95,6 +95,7 @@ public class PeriodicTableState extends GameState {
     private Color nucleusDisplayBackground;
     private Color nucleusDisplayProtonColor;
     private Color nucleusDisplayNeutronColor;
+    private Color nucleusDisplayBorderColor;
     private Element nucleusDisplayHorizontalAnchor;
     private Element nucleusDisplayVerticalAnchor;
     private NucleusAnimation nucleusAnimation;
@@ -131,15 +132,22 @@ public class PeriodicTableState extends GameState {
         nucleusDisplayBackground = Color.WHITE;
         nucleusDisplayProtonColor = Color.RED;
         nucleusDisplayNeutronColor = Color.GRAY;
+        nucleusDisplayBorderColor = new Color(
+                (nucleusDisplayProtonColor.getRed() + nucleusDisplayNeutronColor
+                        .getRed()) / 2,
+                (nucleusDisplayProtonColor.getGreen() + nucleusDisplayNeutronColor
+                        .getGreen()) / 2,
+                (nucleusDisplayProtonColor.getBlue() + nucleusDisplayNeutronColor
+                        .getBlue()) / 2);
         // Hydrogen
         nucleusDisplayVerticalAnchor = pt.getTable().get(0).get(0);
         // Iron
         nucleusDisplayHorizontalAnchor = pt.getTable().get(3).get(7);
 
         configure();
-        nucleusAnimation = new NucleusAnimation(250, selectedElement,
+        nucleusAnimation = new NucleusAnimation(-1, selectedElement,
                 nucleusDisplayProtonColor, nucleusDisplayNeutronColor,
-                nucleusDisplayScatterSize);
+                nucleusDisplayBorderColor, nucleusDisplayScatterSize);
 
         selectedElementRow = 0;
         selectedElementCol = 0;
@@ -211,8 +219,8 @@ public class PeriodicTableState extends GameState {
                 - elementHeight / 2;
         nucleusDisplayWidth = elementWidth * 4;
         nucleusDisplayHeight = elementHeight * 3;
-        nucleusDisplayParticleSize = 20;
-        nucleusDisplayScatterSize = 5;
+        nucleusDisplayParticleSize = 15;
+        nucleusDisplayScatterSize = 4;
         nucleusDisplayNucleusCenterX = nucleusDisplayX
                 + (nucleusDisplayWidth / 2) - (nucleusDisplayParticleSize / 2);
         nucleusDisplayNucleusCenterY = nucleusDisplayY

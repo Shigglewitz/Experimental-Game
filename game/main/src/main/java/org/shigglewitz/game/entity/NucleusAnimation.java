@@ -16,6 +16,7 @@ public class NucleusAnimation extends Animation {
     private double neutronsPerProton;
     private Color protonColor;
     private Color neutronColor;
+    private Color borderColor;
     private int baseScatterSize;
     private int scatterSize;
     private Random random;
@@ -23,12 +24,13 @@ public class NucleusAnimation extends Animation {
     List<Point2D> neutronOffsets;
 
     public NucleusAnimation(int delay, Element e, Color protonColor,
-            Color neutronColor, int baseScatterSize) {
+            Color neutronColor, Color borderColor, int baseScatterSize) {
         super();
 
         this.delay = delay;
         this.protonColor = protonColor;
         this.neutronColor = neutronColor;
+        this.borderColor = borderColor;
         this.baseScatterSize = baseScatterSize;
         this.scatterSize = baseScatterSize;
         random = new Random();
@@ -85,12 +87,18 @@ public class NucleusAnimation extends Animation {
                 g.setColor(protonColor);
                 g.fillOval(x + (int) protonOffsets.get(i).getX(), y
                         + (int) protonOffsets.get(i).getY(), width, height);
+                g.setColor(borderColor);
+                g.drawOval(x + (int) protonOffsets.get(i).getX(), y
+                        + (int) protonOffsets.get(i).getY(), width, height);
 
                 currentNeutrons -= neutronsPerProton;
                 while (currentNeutrons > 0
                         && remainingNeutrons >= currentNeutrons) {
                     g.setColor(neutronColor);
                     g.fillOval(x + (int) neutronOffsets.get(i).getX(), y
+                            + (int) neutronOffsets.get(i).getY(), width, height);
+                    g.setColor(borderColor);
+                    g.drawOval(x + (int) neutronOffsets.get(i).getX(), y
                             + (int) neutronOffsets.get(i).getY(), width, height);
                     remainingNeutrons--;
                 }
