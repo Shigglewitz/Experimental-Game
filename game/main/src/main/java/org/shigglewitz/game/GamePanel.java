@@ -3,6 +3,7 @@ package org.shigglewitz.game;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
@@ -49,6 +50,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
         image = new BufferedImage(config.getWidth(), config.getHeight(),
                 BufferedImage.TYPE_INT_RGB);
         g = image.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
         running = true;
         gsm = new GameStateManager();
 
