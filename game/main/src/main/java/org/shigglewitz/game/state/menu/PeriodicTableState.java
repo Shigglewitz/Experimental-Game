@@ -88,8 +88,6 @@ public class PeriodicTableState extends GameState {
     private int nucleusDisplayY;
     private int nucleusDisplayWidth;
     private int nucleusDisplayHeight;
-    private int nucleusDisplayNucleusCenterX;
-    private int nucleusDisplayNucleusCenterY;
     private int nucleusDisplayParticleSize;
     private int nucleusDisplayScatterSize;
     private Color nucleusDisplayBackground;
@@ -145,9 +143,11 @@ public class PeriodicTableState extends GameState {
         nucleusDisplayHorizontalAnchor = pt.getTable().get(3).get(7);
 
         configure();
-        nucleusAnimation = new NucleusAnimation(-1, selectedElement,
+        nucleusAnimation = new NucleusAnimation(250, nucleusDisplayWidth,
+                nucleusDisplayHeight, selectedElement,
                 nucleusDisplayProtonColor, nucleusDisplayNeutronColor,
-                nucleusDisplayBorderColor, nucleusDisplayScatterSize);
+                nucleusDisplayBorderColor, nucleusDisplayScatterSize,
+                nucleusDisplayParticleSize);
 
         selectedElementRow = 0;
         selectedElementCol = 0;
@@ -221,10 +221,6 @@ public class PeriodicTableState extends GameState {
         nucleusDisplayHeight = elementHeight * 3;
         nucleusDisplayParticleSize = 15;
         nucleusDisplayScatterSize = 4;
-        nucleusDisplayNucleusCenterX = nucleusDisplayX
-                + (nucleusDisplayWidth / 2) - (nucleusDisplayParticleSize / 2);
-        nucleusDisplayNucleusCenterY = nucleusDisplayY
-                + (nucleusDisplayHeight / 2) - (nucleusDisplayParticleSize / 2);
 
         if (nucleusAnimation != null) {
             nucleusAnimation.setBaseScatterSize(nucleusDisplayScatterSize);
@@ -421,9 +417,10 @@ public class PeriodicTableState extends GameState {
     protected void drawSelectedFlash(Graphics2D g) {
         Composite originalComposite = g.getComposite();
         g.setComposite(alphaComposite);
-        flashing.draw(g, calculateHorizontalOffset(selectedElement),
+        g.drawImage(flashing.getImage(),
+                calculateHorizontalOffset(selectedElement),
                 calculateVerticalOffset(selectedElement), elementWidth,
-                elementHeight);
+                elementHeight, null);
         g.setComposite(originalComposite);
     }
 
@@ -478,9 +475,8 @@ public class PeriodicTableState extends GameState {
         g.setColor(nucleusDisplayBackground);
         g.fillRect(nucleusDisplayX, nucleusDisplayY, nucleusDisplayWidth,
                 nucleusDisplayHeight);
-        nucleusAnimation.draw(g, nucleusDisplayNucleusCenterX,
-                nucleusDisplayNucleusCenterY, nucleusDisplayParticleSize,
-                nucleusDisplayParticleSize);
+        g.drawImage(nucleusAnimation.getImage(), nucleusDisplayX,
+                nucleusDisplayY, null);
     }
 
     protected int calculateHorizontalOffset(Element e) {

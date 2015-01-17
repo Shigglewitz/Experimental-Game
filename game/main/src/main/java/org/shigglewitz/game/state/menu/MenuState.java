@@ -12,6 +12,7 @@ import org.shigglewitz.game.state.GameStateManager;
 public class MenuState extends GameState {
     protected enum MenuOption {
         START("Start"),
+        TEST("Test"),
         OPTIONS("Options"),
         EXIT("Exit");
 
@@ -153,6 +154,9 @@ public class MenuState extends GameState {
         case START:
             start();
             break;
+        case TEST:
+            test();
+            break;
         case OPTIONS:
             options();
             break;
@@ -164,6 +168,10 @@ public class MenuState extends GameState {
 
     protected void start() {
         gsm.push(new PeriodicTableState(gsm));
+    }
+
+    protected void test() {
+        gsm.push(new TestState(gsm));
     }
 
     protected void options() {
