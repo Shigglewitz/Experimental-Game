@@ -13,6 +13,7 @@ import org.shigglewitz.game.entity.chemistry.Element;
 public class NucleusAnimation extends Animation {
     private int numProtons;
     private int numNeutrons;
+    private double neutronsPerProton;
     private Color protonColor;
     private Color neutronColor;
     private int baseScatterSize;
@@ -41,6 +42,7 @@ public class NucleusAnimation extends Animation {
     public void changeElement(Element e) {
         numProtons = e.getAtomicNumber();
         numNeutrons = (int) e.getAtomicWeight() - numProtons;
+        neutronsPerProton = ((double) numNeutrons) / ((double) numProtons);
         scatterSize = (int) (baseScatterSize * Math.log(e.getAtomicWeight()));
         reset();
     }
@@ -76,17 +78,22 @@ public class NucleusAnimation extends Animation {
     public void draw(Graphics2D g, int x, int y, int width, int height) {
         synchronized (this) {
             int currentProtons = numProtons;
-            int currentNeutrons = numNeutrons;
-            g.setColor(protonColor);
+            double currentNeutrons = numNeutrons;
+            int remainingNeutrons = numNeutrons;
+
             for (int i = 0; i < currentProtons; i++) {
+                g.setColor(protonColor);
                 g.fillOval(x + (int) protonOffsets.get(i).getX(), y
                         + (int) protonOffsets.get(i).getY(), width, height);
-            }
 
-            g.setColor(neutronColor);
-            for (int i = 0; i < currentNeutrons; i++) {
-                g.fillOval(x + (int) neutronOffsets.get(i).getX(), y
-                        + (int) neutronOffsets.get(i).getY(), width, height);
+                currentNeutrons -= neutronsPerProton;
+                while (currentNeutrons > 0
+                        && remainingNeutrons >= currentNeutrons) {
+                    g.setColor(neutronColor);
+                    g.fillOval(x + (int) neutronOffsets.get(i).getX(), y
+                            + (int) neutronOffsets.get(i).getY(), width, height);
+                    remainingNeutrons--;
+                }
             }
         }
     }
