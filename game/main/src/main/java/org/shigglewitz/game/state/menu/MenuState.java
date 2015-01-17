@@ -11,7 +11,9 @@ import org.shigglewitz.game.state.GameStateManager;
 
 public class MenuState extends GameState {
     protected enum MenuOption {
-        START("Start"), OPTIONS("Options"), EXIT("Exit");
+        START("Start"),
+        OPTIONS("Options"),
+        EXIT("Exit");
 
         private String text;
 
@@ -76,12 +78,10 @@ public class MenuState extends GameState {
     }
 
     @Override
-    protected void init() {
-    }
+    protected void init() {}
 
     @Override
-    public void update() {
-    }
+    public void update() {}
 
     @Override
     public void draw(Graphics2D g) {
@@ -112,8 +112,8 @@ public class MenuState extends GameState {
                 g.setColor(menuColor);
             }
             Utils.drawHorizontallyCenteredString(mo.getText(), g,
-                    menuVerticalOffset + i * menuVerticalSize,
-                    config.getWidth(), config.getHeight());
+                    menuVerticalOffset + i * menuVerticalSize, config
+                            .getWidth(), config.getHeight());
             i++;
         }
     }

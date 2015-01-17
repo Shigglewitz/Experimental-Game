@@ -66,6 +66,8 @@ public class PeriodicTableState extends GameState {
     private int selectedDisplayY;
     private int selectedDisplayWidth;
     private int selectedDisplayHeight;
+    private int selectedDisplayInfoAscent;
+    private int selectedDisplayInfoCharWidth;
     private int selectedDisplayAtomicNumberOffset;
     private int selectedDisplaySymbolOffset;
     private int selectedDisplayNameOffset;
@@ -155,7 +157,7 @@ public class PeriodicTableState extends GameState {
 
         // selected offsets
         fm = c.getFontMetrics(selectedDisplayAtomicNumberFont);
-        selectedDisplayAtomicNumberOffset = VERTICAL_PIXEL_PADDING
+        selectedDisplayAtomicNumberOffset = (VERTICAL_PIXEL_PADDING * 3)
                 + fm.getAscent();
         fm = c.getFontMetrics(selectedDisplaySymbolFont);
         selectedDisplaySymbolOffset = selectedDisplayAtomicNumberOffset
@@ -163,8 +165,10 @@ public class PeriodicTableState extends GameState {
         fm = c.getFontMetrics(selectedDisplayInfoFont);
         selectedDisplayNameOffset = (6 * VERTICAL_PIXEL_PADDING)
                 + selectedDisplaySymbolOffset + fm.getAscent();
-        selectedDisplayMassOffset = VERTICAL_PIXEL_PADDING
+        selectedDisplayMassOffset = (VERTICAL_PIXEL_PADDING * 3)
                 + selectedDisplayNameOffset + fm.getAscent();
+        selectedDisplayInfoAscent = fm.getAscent();
+        selectedDisplayInfoCharWidth = fm.charWidth('0');
 
         selectedDisplayX = calculateHorizontalOffset(selectedDisplayHorizontalAnchor)
                 + elementWidth / 2;
@@ -382,29 +386,37 @@ public class PeriodicTableState extends GameState {
         g.setFont(selectedDisplayInfoFont);
         g.setColor(selectedDisplayInfoColor);
         g.drawString(Integer.toString(selectedElement.getAtomicNumber()),
-                selectedDisplayX + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
-                        + selectedDisplayAtomicNumberOffset);
+                selectedDisplayX + (HORIZONTAL_PIXEL_PADDING * 4),
+                selectedDisplayY + selectedDisplayAtomicNumberOffset);
         // symbol
         g.setFont(selectedDisplaySymbolFont);
         g.setColor(selectedDisplaySymbolColor);
         g.drawString(selectedElement.getSymbol(), selectedDisplayX
-                + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                + (HORIZONTAL_PIXEL_PADDING * 4), selectedDisplayY
                 + selectedDisplaySymbolOffset);
         // name
         g.setFont(selectedDisplayInfoFont);
         g.setColor(selectedDisplayInfoColor);
         g.drawString(selectedElement.getName(), selectedDisplayX
-                + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                + (HORIZONTAL_PIXEL_PADDING * 4), selectedDisplayY
                 + selectedDisplayNameOffset);
         // mass
         g.drawString(SELECTED_ATOMIC_MASS_FORMAT.format(selectedElement
                 .getAtomicWeight()), selectedDisplayX
-                + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                + (HORIZONTAL_PIXEL_PADDING * 4), selectedDisplayY
                 + selectedDisplayMassOffset);
         // electron configuration
-        // g.drawString(selectedElement.getElectronConfiguration(),
-        // selectedDisplayX + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
-        // + selectedDisplayMassOffset + 30);
+        List<String> shellCounts = selectedElement.getElectronConfiguration()
+                .getShellCounts();
+        String s = null;
+        for (int i = 0; i < shellCounts.size(); i++) {
+            s = shellCounts.get(i);
+            g.drawString(s, selectedDisplayX + selectedDisplayWidth
+                    - (selectedDisplayInfoCharWidth * s.length())
+                    - (HORIZONTAL_PIXEL_PADDING * 4), selectedDisplayY
+                    + selectedDisplayInfoAscent * (i + 1)
+                    + (VERTICAL_PIXEL_PADDING * 3));
+        }
     }
 
     protected int calculateHorizontalOffset(Element e) {

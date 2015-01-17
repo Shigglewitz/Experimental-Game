@@ -1,5 +1,6 @@
 package org.shigglewitz.game.entity.chemistry;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -7,7 +8,8 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "project")
-public class Binding {
+public class Binding implements Serializable {
+    private static final long serialVersionUID = 8081097302220826229L;
     private List<ElementBinding> elements;
 
     @XmlElementWrapper(name = "rows")
@@ -20,7 +22,8 @@ public class Binding {
         this.elements = elements;
     }
 
-    public static class ElementBinding {
+    public static class ElementBinding implements Serializable {
+        private static final long serialVersionUID = 856239111777652067L;
         private int id;
         private Element element;
 

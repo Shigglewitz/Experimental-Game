@@ -57,8 +57,7 @@ public class OptionsState extends GameState {
     }
 
     @Override
-    public void update() {
-    }
+    public void update() {}
 
     @Override
     public void draw(Graphics2D g) {
@@ -77,16 +76,14 @@ public class OptionsState extends GameState {
                 g.setColor(optionsColor);
             }
 
-            Utils.drawHorizontallyCenteredString(
-                    o.getDescription() + " : " + o.displayKey(), g,
-                    optionsVerticalOffset + i * optionsHeight,
-                    config.getWidth(), config.getHeight());
+            Utils.drawHorizontallyCenteredString(o.getDescription() + " : "
+                    + o.displayKey(), g, optionsVerticalOffset + i
+                    * optionsHeight, config.getWidth(), config.getHeight());
         }
     }
 
     @Override
-    protected void init() {
-    }
+    protected void init() {}
 
     @Override
     protected void keyPressed(int k) {

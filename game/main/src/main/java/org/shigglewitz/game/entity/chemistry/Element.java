@@ -1,13 +1,21 @@
 package org.shigglewitz.game.entity.chemistry;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Element implements Serializable {
+    protected static final String NOTATION_STRING = "(\\[([A-Z][a-z]?)\\] )?(([0-9][a-z][1-9][0-9]?)[ ]?)+";
+    protected static final Pattern NOTATION_PATTERN = Pattern
+            .compile(NOTATION_STRING);
+
     @XmlType
     @XmlEnum(String.class)
     public static enum Type {
@@ -46,7 +54,8 @@ public class Element implements Serializable {
     private String discoverer;
     private int yearOfDiscovery;
     private double specificHeatCapacity;
-    private String electronConfiguration;
+    private String electronNotation;
+    private ElectronConfiguration electronConfiguration;
     private int displayRow;
     private int displayColumn;
 
@@ -231,12 +240,12 @@ public class Element implements Serializable {
     }
 
     @XmlElement(name = "electron-configuration")
-    public String getElectronConfiguration() {
-        return electronConfiguration;
+    public String getElectronNotation() {
+        return electronNotation;
     }
 
-    public void setElectronConfiguration(String electronConfiguration) {
-        this.electronConfiguration = electronConfiguration;
+    public void setElectronNotation(String electronNotation) {
+        this.electronNotation = electronNotation;
     }
 
     @XmlElement(name = "display-row")
@@ -255,5 +264,26 @@ public class Element implements Serializable {
 
     public void setDisplayColumn(int displayColumn) {
         this.displayColumn = displayColumn;
+    }
+
+    public void initializeElectronConfiguration(Map<String, Element> nobleGasses) {
+        String[] shells = this.electronNotation.split(" ");
+
+        if (shells[0].startsWith("[")) {
+            shells[0] = nobleGasses.get(shells[0]).getElectronConfiguration()
+                    .toString();
+        }
+
+        electronConfiguration = new ElectronConfiguration(StringUtils.join(
+                shells, " "));
+    }
+
+    public ElectronConfiguration getElectronConfiguration() {
+        return electronConfiguration;
+    }
+
+    public void setElectronConfiguration(
+            ElectronConfiguration electronConfiguration) {
+        this.electronConfiguration = electronConfiguration;
     }
 }
