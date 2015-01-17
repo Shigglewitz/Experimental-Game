@@ -121,6 +121,8 @@ public class PeriodicTableState extends GameState {
 
     @Override
     protected void keyPressed(int k) {
+        super.keyPressed(k);
+
         switch (k) {
         case KeyEvent.VK_ESCAPE:
             exit();

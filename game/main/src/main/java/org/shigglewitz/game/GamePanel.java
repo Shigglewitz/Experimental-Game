@@ -74,7 +74,19 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
         long elapsed;
         long wait;
 
+        int countingFps = -1;
+        long currentSecond = System.currentTimeMillis() / 1_000;
+        long trackingSecond = System.currentTimeMillis() / 1_000;
+
         while (running) {
+            countingFps++;
+            trackingSecond = System.currentTimeMillis() / 1_000;
+            if (currentSecond != trackingSecond) {
+                gsm.setFps(countingFps);
+                countingFps = 0;
+                currentSecond = trackingSecond;
+            }
+
             start = System.nanoTime();
 
             update();
@@ -97,8 +109,9 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
 
     private void drawToScreen() {
         Graphics g2 = getGraphics();
-        g2.drawImage(image, 0, 0, config.getWidth() * config.getScale(),
-                config.getHeight() * config.getScale(), null);
+        g2.drawImage(image, 0, 0, config.getWidth() * config.getScale(), config
+                .getHeight()
+                * config.getScale(), null);
         g2.dispose();
     }
 
@@ -113,6 +126,5 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
     }
 
     @Override
-    public void keyTyped(KeyEvent ke) {
-    }
+    public void keyTyped(KeyEvent ke) {}
 }

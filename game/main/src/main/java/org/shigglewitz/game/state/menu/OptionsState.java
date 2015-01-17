@@ -90,6 +90,8 @@ public class OptionsState extends GameState {
 
     @Override
     protected void keyPressed(int k) {
+        super.keyPressed(k);
+
         if (activeOption < 0) {
             switch (k) {
             case KeyEvent.VK_DOWN:

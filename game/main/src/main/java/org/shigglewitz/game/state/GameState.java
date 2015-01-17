@@ -1,5 +1,7 @@
 package org.shigglewitz.game.state;
 
+import java.awt.event.KeyEvent;
+
 import org.shigglewitz.game.GameObject;
 import org.shigglewitz.game.config.Config;
 import org.shigglewitz.game.config.Configurable;
@@ -19,10 +21,14 @@ public abstract class GameState implements GameObject, Configurable {
     protected abstract void init();
 
     protected void keyPressed(int k) {
+        switch (k) {
+        case KeyEvent.VK_F12:
+            gsm.toggleDisplayFps();
+            break;
+        }
     }
 
-    protected void keyReleased(int k) {
-    }
+    protected void keyReleased(int k) {}
 
     public boolean isInitialized() {
         return initialized;

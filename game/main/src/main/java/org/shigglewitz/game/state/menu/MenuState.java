@@ -120,6 +120,8 @@ public class MenuState extends GameState {
 
     @Override
     protected void keyPressed(int k) {
+        super.keyPressed(k);
+
         switch (k) {
         case KeyEvent.VK_UP:
             decrementMenu();
