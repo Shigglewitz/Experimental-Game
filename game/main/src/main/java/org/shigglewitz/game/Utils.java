@@ -45,7 +45,4 @@ public class Utils {
         return (AlphaComposite.getInstance(type, alpha));
     }
 
-    public static boolean hasText(String s) {
-        return s != null && !s.matches("\\s*");
-    }
 }
