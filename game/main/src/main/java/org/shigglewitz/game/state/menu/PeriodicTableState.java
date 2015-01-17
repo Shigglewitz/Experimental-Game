@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 import org.shigglewitz.game.Utils;
 import org.shigglewitz.game.config.Sprite;
 import org.shigglewitz.game.entity.Animation;
+import org.shigglewitz.game.entity.NucleusAnimation;
+import org.shigglewitz.game.entity.SpriteAnimation;
 import org.shigglewitz.game.entity.chemistry.Element;
 import org.shigglewitz.game.entity.chemistry.Element.Type;
 import org.shigglewitz.game.entity.chemistry.PeriodicTable;
@@ -82,6 +84,21 @@ public class PeriodicTableState extends GameState {
     private Element selectedDisplayHorizontalAnchor;
     private Element selectedDisplayVerticalAnchor;
 
+    private int nucleusDisplayX;
+    private int nucleusDisplayY;
+    private int nucleusDisplayWidth;
+    private int nucleusDisplayHeight;
+    private int nucleusDisplayNucleusCenterX;
+    private int nucleusDisplayNucleusCenterY;
+    private int nucleusDisplayParticleSize;
+    private int nucleusDisplayScatterSize;
+    private Color nucleusDisplayBackground;
+    private Color nucleusDisplayProtonColor;
+    private Color nucleusDisplayNeutronColor;
+    private Element nucleusDisplayHorizontalAnchor;
+    private Element nucleusDisplayVerticalAnchor;
+    private NucleusAnimation nucleusAnimation;
+
     public PeriodicTableState(GameStateManager gsm) {
         super(gsm);
 
@@ -99,9 +116,7 @@ public class PeriodicTableState extends GameState {
         elementInformationColor = Color.BLACK;
         elementAtomicNumberColor = Color.BLACK;
 
-        flashing = new Animation();
-        flashing.setFrames(resources.requestSprite(Sprite.FLASHING));
-        flashing.setDelay(Sprite.FLASHING.getDelay());
+        flashing = new SpriteAnimation(Sprite.FLASHING);
         alphaComposite = Utils.makeComposite((float) 0.25);
 
         selectedDisplayBackground = Color.BLACK;
@@ -110,14 +125,25 @@ public class PeriodicTableState extends GameState {
         selectedDisplayInfoColor = Color.LIGHT_GRAY;
         // Hydrogen
         selectedDisplayVerticalAnchor = pt.getTable().get(0).get(0);
-        // Titanium
-        selectedDisplayHorizontalAnchor = pt.getTable().get(3).get(3);
+        // Scandium
+        selectedDisplayHorizontalAnchor = pt.getTable().get(3).get(2);
+
+        nucleusDisplayBackground = Color.WHITE;
+        nucleusDisplayProtonColor = Color.RED;
+        nucleusDisplayNeutronColor = Color.GRAY;
+        // Hydrogen
+        nucleusDisplayVerticalAnchor = pt.getTable().get(0).get(0);
+        // Iron
+        nucleusDisplayHorizontalAnchor = pt.getTable().get(3).get(7);
+
+        configure();
+        nucleusAnimation = new NucleusAnimation(250, selectedElement,
+                nucleusDisplayProtonColor, nucleusDisplayNeutronColor,
+                nucleusDisplayScatterSize);
 
         selectedElementRow = 0;
         selectedElementCol = 0;
         findSelectedElement();
-
-        configure();
     }
 
     protected void findSelectedElement() {
@@ -125,8 +151,9 @@ public class PeriodicTableState extends GameState {
                 + selectedElementCol + ")");
         selectedElement = pt.getTable().get(selectedElementRow).get(
                 selectedElementCol);
-        flashing.setFrame(0);
+        flashing.reset();
         logger.debug("Found " + selectedElement.getName());
+        nucleusAnimation.changeElement(selectedElement);
     }
 
     @Override
@@ -176,6 +203,24 @@ public class PeriodicTableState extends GameState {
                 - elementHeight / 2;
         selectedDisplayWidth = elementWidth * 4;
         selectedDisplayHeight = elementHeight * 3;
+
+        // nucleus display offsets
+        nucleusDisplayX = calculateHorizontalOffset(nucleusDisplayHorizontalAnchor)
+                + elementWidth / 2;
+        nucleusDisplayY = calculateVerticalOffset(nucleusDisplayVerticalAnchor)
+                - elementHeight / 2;
+        nucleusDisplayWidth = elementWidth * 4;
+        nucleusDisplayHeight = elementHeight * 3;
+        nucleusDisplayParticleSize = 20;
+        nucleusDisplayScatterSize = 5;
+        nucleusDisplayNucleusCenterX = nucleusDisplayX
+                + (nucleusDisplayWidth / 2) - (nucleusDisplayParticleSize / 2);
+        nucleusDisplayNucleusCenterY = nucleusDisplayY
+                + (nucleusDisplayHeight / 2) - (nucleusDisplayParticleSize / 2);
+
+        if (nucleusAnimation != null) {
+            nucleusAnimation.setBaseScatterSize(nucleusDisplayScatterSize);
+        }
     }
 
     @Override
@@ -275,15 +320,13 @@ public class PeriodicTableState extends GameState {
     @Override
     public void update() {
         flashing.update();
+        nucleusAnimation.update();
     }
 
     @Override
     public void draw(Graphics2D g) {
         drawBackground(g);
-        drawOutlines(g);
-        drawAtomicNumbers(g);
-        drawSymbols(g);
-        drawInformation(g);
+        drawElements(g);
         drawSelected(g);
     }
 
@@ -292,13 +335,16 @@ public class PeriodicTableState extends GameState {
         g.fillRect(0, 0, config.getWidth(), config.getHeight());
     }
 
-    protected void drawOutlines(Graphics2D g) {
+    protected void drawElements(Graphics2D g) {
+        drawOutlines(g);
+        drawAtomicNumbers(g);
+        drawSymbols(g);
+        drawAtomicMass(g);
+    }
 
+    protected void drawOutlines(Graphics2D g) {
         for (List<Element> period : pt.getTable()) {
             for (Element e : period) {
-                if (e == null) {
-                    continue;
-                }
                 g.setColor(elementOutlineColor);
                 g.drawRect(calculateHorizontalOffset(e),
                         calculateVerticalOffset(e), elementWidth, elementHeight);
@@ -342,7 +388,7 @@ public class PeriodicTableState extends GameState {
         }
     }
 
-    protected void drawInformation(Graphics2D g) {
+    protected void drawAtomicMass(Graphics2D g) {
         g.setColor(elementInformationColor);
         g.setFont(elementInformationFont);
         for (List<Element> period : pt.getTable()) {
@@ -361,15 +407,15 @@ public class PeriodicTableState extends GameState {
     protected void drawSelected(Graphics2D g) {
         drawSelectedFlash(g);
         drawSelectedInfo(g);
+        drawNucleus(g);
     }
 
     protected void drawSelectedFlash(Graphics2D g) {
         Composite originalComposite = g.getComposite();
         g.setComposite(alphaComposite);
-        g.drawImage(flashing.getImage(),
-                calculateHorizontalOffset(selectedElement),
+        flashing.draw(g, calculateHorizontalOffset(selectedElement),
                 calculateVerticalOffset(selectedElement), elementWidth,
-                elementHeight, null);
+                elementHeight);
         g.setComposite(originalComposite);
     }
 
@@ -417,6 +463,16 @@ public class PeriodicTableState extends GameState {
                     + selectedDisplayInfoAscent * (i + 1)
                     + (VERTICAL_PIXEL_PADDING * 3));
         }
+    }
+
+    protected void drawNucleus(Graphics2D g) {
+        // background
+        g.setColor(nucleusDisplayBackground);
+        g.fillRect(nucleusDisplayX, nucleusDisplayY, nucleusDisplayWidth,
+                nucleusDisplayHeight);
+        nucleusAnimation.draw(g, nucleusDisplayNucleusCenterX,
+                nucleusDisplayNucleusCenterY, nucleusDisplayParticleSize,
+                nucleusDisplayParticleSize);
     }
 
     protected int calculateHorizontalOffset(Element e) {

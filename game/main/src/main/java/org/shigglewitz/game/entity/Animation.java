@@ -1,34 +1,18 @@
 package org.shigglewitz.game.entity;
 
-import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
 
-public class Animation {
-    private BufferedImage[] frames;
-    private int currentFrame;
+public abstract class Animation {
+    protected long startTime;
+    protected long delay;
 
-    private long startTime;
-    private long delay;
-
-    private boolean playedOnce;
+    protected boolean playedOnce;
 
     public Animation() {
         playedOnce = false;
     }
 
-    public void setFrames(BufferedImage[] frames) {
-        this.frames = frames;
-        currentFrame = 0;
-        startTime = System.nanoTime();
-        playedOnce = false;
-    }
-
-    public void setDelay(long delay) {
-        this.delay = delay;
-    }
-
-    public void setFrame(int frame) {
-        currentFrame = frame;
-    }
+    public abstract void reset();
 
     public void update() {
         if (delay == -1) {
@@ -37,22 +21,14 @@ public class Animation {
 
         long elapsed = (System.nanoTime() - startTime) / 1_000_000;
         if (elapsed > delay) {
-            currentFrame++;
+            incrementFrame();
             startTime = System.nanoTime();
         }
-        if (currentFrame >= frames.length) {
-            currentFrame = 0;
-            playedOnce = true;
-        }
     }
 
-    public int getFrame() {
-        return currentFrame;
-    }
+    protected abstract void incrementFrame();
 
-    public BufferedImage getImage() {
-        return frames[currentFrame];
-    }
+    public abstract void draw(Graphics2D g, int x, int y, int width, int height);
 
     public boolean hasPlayedOnce() {
         return playedOnce;
