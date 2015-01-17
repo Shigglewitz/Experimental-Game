@@ -14,6 +14,8 @@ import org.shigglewitz.game.config.Configurable;
 public class GameStateManager implements GameObject, Configurable {
     private Stack<GameState> states;
     private int fps;
+    private long rest;
+    private long elapsed;
     private boolean displayFps;
     private Font fpsFont;
     private Color fpsColor;
@@ -60,6 +62,10 @@ public class GameStateManager implements GameObject, Configurable {
             g.setFont(fpsFont);
             g.drawString(Integer.toString(fps), Config.getConfig().getWidth()
                     - fpsX, fpsY);
+            g.drawString(Long.toString(rest), Config.getConfig().getWidth()
+                    - fpsX, fpsY * 2);
+            g.drawString(Long.toString(elapsed), Config.getConfig().getWidth()
+                    - fpsX, fpsY * 3);
         }
     }
 
@@ -80,6 +86,14 @@ public class GameStateManager implements GameObject, Configurable {
 
     public void setFps(int fps) {
         this.fps = fps;
+    }
+
+    public void setRest(long rest) {
+        this.rest = rest;
+    }
+
+    public void setElapsed(long elapsed) {
+        this.elapsed = elapsed;
     }
 
     public void toggleDisplayFps() {

@@ -100,6 +100,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
             if (wait > 0) {
                 try {
                     Thread.sleep(wait);
+                    gsm.setRest(wait);
+                    gsm.setElapsed(elapsed / 1_000_000);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
