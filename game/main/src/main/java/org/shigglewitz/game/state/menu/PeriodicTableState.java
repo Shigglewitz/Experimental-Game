@@ -26,12 +26,17 @@ public class PeriodicTableState extends GameState {
 
     private static final NumberFormat ATOMIC_MASS_FORMAT = NumberFormat
             .getInstance();
+    private static final NumberFormat SELECTED_ATOMIC_MASS_FORMAT = NumberFormat
+            .getInstance();
     private static final int HORIZONTAL_PIXEL_PADDING = 2;
     private static final int VERTICAL_PIXEL_PADDING = 2;
 
     static {
         ATOMIC_MASS_FORMAT.setMaximumFractionDigits(3);
         ATOMIC_MASS_FORMAT.setMinimumFractionDigits(1);
+
+        SELECTED_ATOMIC_MASS_FORMAT.setMaximumFractionDigits(6);
+        SELECTED_ATOMIC_MASS_FORMAT.setMinimumFractionDigits(1);
     }
 
     private PeriodicTable pt;
@@ -57,6 +62,24 @@ public class PeriodicTableState extends GameState {
     private Composite alphaComposite;
     private Animation flashing;
 
+    private int selectedDisplayX;
+    private int selectedDisplayY;
+    private int selectedDisplayWidth;
+    private int selectedDisplayHeight;
+    private int selectedDisplayAtomicNumberOffset;
+    private int selectedDisplaySymbolOffset;
+    private int selectedDisplayNameOffset;
+    private int selectedDisplayMassOffset;
+    private Color selectedDisplayBackground;
+    private Color selectedDisplayBorder;
+    private Color selectedDisplaySymbolColor;
+    private Color selectedDisplayInfoColor;
+    private Font selectedDisplayAtomicNumberFont;
+    private Font selectedDisplaySymbolFont;
+    private Font selectedDisplayInfoFont;
+    private Element selectedDisplayHorizontalAnchor;
+    private Element selectedDisplayVerticalAnchor;
+
     public PeriodicTableState(GameStateManager gsm) {
         super(gsm);
 
@@ -79,6 +102,15 @@ public class PeriodicTableState extends GameState {
         flashing.setDelay(Sprite.FLASHING.getDelay());
         alphaComposite = Utils.makeComposite((float) 0.25);
 
+        selectedDisplayBackground = Color.BLACK;
+        selectedDisplayBorder = Color.LIGHT_GRAY;
+        selectedDisplaySymbolColor = Color.WHITE;
+        selectedDisplayInfoColor = Color.LIGHT_GRAY;
+        // Hydrogen
+        selectedDisplayVerticalAnchor = pt.getTable().get(0).get(0);
+        // Titanium
+        selectedDisplayHorizontalAnchor = pt.getTable().get(3).get(3);
+
         selectedElementRow = 0;
         selectedElementCol = 0;
         findSelectedElement();
@@ -89,8 +121,8 @@ public class PeriodicTableState extends GameState {
     protected void findSelectedElement() {
         logger.debug("Seeking: (" + selectedElementRow + ","
                 + selectedElementCol + ")");
-        selectedElement = pt.getTable().get(selectedElementRow)
-                .get(selectedElementCol);
+        selectedElement = pt.getTable().get(selectedElementRow).get(
+                selectedElementCol);
         flashing.setFrame(0);
         logger.debug("Found " + selectedElement.getName());
     }
@@ -103,20 +135,43 @@ public class PeriodicTableState extends GameState {
         // side of rare earth elements
         elementHeight = config.getHeight() / (pt.getTable().size() + 3);
 
-        // make this based on size
+        // TODO: make this based on size
         elementSymbolFont = new Font("Gothic", Font.BOLD, 20);
         elementInformationFont = new Font("Arial", Font.PLAIN, 10);
         elementAtomicNumberFont = new Font("Arial", Font.PLAIN, 14);
+        selectedDisplayAtomicNumberFont = new Font("Arial", Font.PLAIN, 25);
+        selectedDisplaySymbolFont = new Font("Gothic", Font.BOLD, 60);
+        selectedDisplayInfoFont = new Font("Arial", Font.PLAIN, 20);
 
         Canvas c = new Canvas();
+        // main table offsets
         FontMetrics fm = c.getFontMetrics(elementAtomicNumberFont);
         atomicNumberOffset = VERTICAL_PIXEL_PADDING + fm.getAscent();
         fm = c.getFontMetrics(elementSymbolFont);
-        symbolOffset = atomicNumberOffset + VERTICAL_PIXEL_PADDING
-                + fm.getAscent();
+        symbolOffset = atomicNumberOffset + fm.getAscent();
         fm = c.getFontMetrics(elementInformationFont);
         atomicMassOffset = symbolOffset + VERTICAL_PIXEL_PADDING
                 + fm.getAscent();
+
+        // selected offsets
+        fm = c.getFontMetrics(selectedDisplayAtomicNumberFont);
+        selectedDisplayAtomicNumberOffset = VERTICAL_PIXEL_PADDING
+                + fm.getAscent();
+        fm = c.getFontMetrics(selectedDisplaySymbolFont);
+        selectedDisplaySymbolOffset = selectedDisplayAtomicNumberOffset
+                + fm.getAscent() - 5;
+        fm = c.getFontMetrics(selectedDisplayInfoFont);
+        selectedDisplayNameOffset = (6 * VERTICAL_PIXEL_PADDING)
+                + selectedDisplaySymbolOffset + fm.getAscent();
+        selectedDisplayMassOffset = VERTICAL_PIXEL_PADDING
+                + selectedDisplayNameOffset + fm.getAscent();
+
+        selectedDisplayX = calculateHorizontalOffset(selectedDisplayHorizontalAnchor)
+                + elementWidth / 2;
+        selectedDisplayY = calculateVerticalOffset(selectedDisplayVerticalAnchor)
+                - elementHeight / 2;
+        selectedDisplayWidth = elementWidth * 4;
+        selectedDisplayHeight = elementHeight * 3;
     }
 
     @Override
@@ -172,10 +227,10 @@ public class PeriodicTableState extends GameState {
                     numPeriods);
         }
 
-        if (pt.getTable().get(previousRow).size() != pt.getTable()
-                .get(selectedElementRow).size()) {
-            selectedElementCol = findClosestFamily(
-                    selectedElement.getDisplayColumn(), selectedElementRow);
+        if (pt.getTable().get(previousRow).size() != pt.getTable().get(
+                selectedElementRow).size()) {
+            selectedElementCol = findClosestFamily(selectedElement
+                    .getDisplayColumn(), selectedElementRow);
         }
 
         findSelectedElement();
@@ -300,6 +355,11 @@ public class PeriodicTableState extends GameState {
     }
 
     protected void drawSelected(Graphics2D g) {
+        drawSelectedFlash(g);
+        drawSelectedInfo(g);
+    }
+
+    protected void drawSelectedFlash(Graphics2D g) {
         Composite originalComposite = g.getComposite();
         g.setComposite(alphaComposite);
         g.drawImage(flashing.getImage(),
@@ -307,6 +367,44 @@ public class PeriodicTableState extends GameState {
                 calculateVerticalOffset(selectedElement), elementWidth,
                 elementHeight, null);
         g.setComposite(originalComposite);
+    }
+
+    protected void drawSelectedInfo(Graphics2D g) {
+        // background
+        g.setColor(selectedDisplayBackground);
+        g.fillRect(selectedDisplayX, selectedDisplayY, selectedDisplayWidth,
+                selectedDisplayHeight);
+        // border
+        g.setColor(selectedDisplayBorder);
+        g.drawRect(selectedDisplayX, selectedDisplayY, selectedDisplayWidth,
+                selectedDisplayHeight);
+        // atomic number
+        g.setFont(selectedDisplayInfoFont);
+        g.setColor(selectedDisplayInfoColor);
+        g.drawString(Integer.toString(selectedElement.getAtomicNumber()),
+                selectedDisplayX + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                        + selectedDisplayAtomicNumberOffset);
+        // symbol
+        g.setFont(selectedDisplaySymbolFont);
+        g.setColor(selectedDisplaySymbolColor);
+        g.drawString(selectedElement.getSymbol(), selectedDisplayX
+                + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                + selectedDisplaySymbolOffset);
+        // name
+        g.setFont(selectedDisplayInfoFont);
+        g.setColor(selectedDisplayInfoColor);
+        g.drawString(selectedElement.getName(), selectedDisplayX
+                + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                + selectedDisplayNameOffset);
+        // mass
+        g.drawString(SELECTED_ATOMIC_MASS_FORMAT.format(selectedElement
+                .getAtomicWeight()), selectedDisplayX
+                + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+                + selectedDisplayMassOffset);
+        // electron configuration
+        // g.drawString(selectedElement.getElectronConfiguration(),
+        // selectedDisplayX + HORIZONTAL_PIXEL_PADDING, selectedDisplayY
+        // + selectedDisplayMassOffset + 30);
     }
 
     protected int calculateHorizontalOffset(Element e) {
