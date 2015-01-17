@@ -116,15 +116,11 @@ public class OptionsState extends GameState {
     }
 
     protected void incrementSelected() {
-        selectedOption = (selectedOption + 1) % options.size();
+        selectedOption = Utils.incrementAndWrap(selectedOption, options.size());
     }
 
     protected void decrementSelected() {
-        if (selectedOption == 0) {
-            selectedOption = options.size() - 1;
-        } else {
-            selectedOption--;
-        }
+        selectedOption = Utils.decrementAndWrap(selectedOption, options.size());
     }
 
     protected void exit() {

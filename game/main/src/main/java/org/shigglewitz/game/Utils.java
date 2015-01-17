@@ -45,4 +45,15 @@ public class Utils {
         return (AlphaComposite.getInstance(type, alpha));
     }
 
+    public static int incrementAndWrap(int initial, int size) {
+        return (initial + 1) % size;
+    }
+
+    public static int decrementAndWrap(int initial, int size) {
+        if (initial <= 0) {
+            return size - 1;
+        } else {
+            return initial - 1;
+        }
+    }
 }

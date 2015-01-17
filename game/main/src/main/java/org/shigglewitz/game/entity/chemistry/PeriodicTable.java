@@ -1,110 +1,93 @@
 package org.shigglewitz.game.entity.chemistry;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.shigglewitz.game.Utils;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.shigglewitz.game.entity.chemistry.Binding.ElementBinding;
+import org.shigglewitz.game.entity.chemistry.Element.Type;
 
 public class PeriodicTable {
-    public static final int NUM_PERIODS = 7;
-    private static final int[] ELEMENTS_PER_PERIOD = { 2, 8, 8, 18, 18, 15, 15 };
+    private Logger logger = LogManager.getLogger(getClass());
 
-    private Element[][] table;
+    private List<List<Element>> table;
+    private List<List<Element>> unmodifiableTable;
 
     public PeriodicTable() {
-        initializeTable();
+        table = new ArrayList<>();
         readProperties();
+        writeProtectTable();
     }
 
-    private void initializeTable() {
-        table = new Element[NUM_PERIODS][];
-        for (int i = 0; i < ELEMENTS_PER_PERIOD.length; i++) {
-            table[i] = new Element[ELEMENTS_PER_PERIOD[i]];
+    private void writeProtectTable() {
+        List<List<Element>> temp = new ArrayList<>();
+
+        for (List<Element> list : table) {
+            temp.add(Collections.unmodifiableList(list));
         }
+        unmodifiableTable = Collections.unmodifiableList(temp);
     }
 
     private void readProperties() {
         try {
-            InputStream in = getClass().getResourceAsStream("/elements.txt");
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String input = null;
-            String[] split;
+            JAXBContext context = JAXBContext.newInstance(Binding.class);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+            Binding binding = (Binding) unmarshaller.unmarshal(getClass()
+                    .getResourceAsStream("/Periodic Table of Elements.xml"));
+            sortElements(binding.getElements());
 
-            int period = 0;
-            int family = 0;
-            int atomicNumber = 0;
-            String symbol = "";
-            String name = "";
-            double weight = 0;
-            Element e;
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+    }
 
-            input = br.readLine();
+    protected void sortElements(List<ElementBinding> list) {
+        Set<Type> types = null;
+        List<Element> lanthanides = new ArrayList<>();
+        List<Element> actinides = new ArrayList<>();
 
-            while (input != null) {
-                // ignore comments
-                if (input.startsWith("#")) {
-                    continue;
-                }
+        if (logger.isDebugEnabled()) {
+            types = new HashSet<>();
+        }
 
-                // if it's a blank line, it symbolizes the next element
-                if (Utils.hasText(input)) {
-                    if (!input.contains("=")) {
-                        name = input;
-                    } else {
-                        split = input.split("=");
-                        switch (split[0]) {
-                        case "Num":
-                            atomicNumber = Integer.parseInt(split[1]);
-                            break;
-                        case "Sym":
-                            symbol = split[1];
-                            break;
-                        case "Wei":
-                            weight = Double.parseDouble(split[1]);
-                            break;
-                        case "Per":
-                            period = Integer.parseInt(split[1]);
-                            break;
-                        case "Fam":
-                            family = Integer.parseInt(split[1]);
-                            break;
-                        }
-                    }
-                } else {
-                    e = new Element(period, family, atomicNumber, symbol, name,
-                            weight);
-                    insertElement(e);
-
-                    // reset properties
-                    period = 0;
-                    family = 0;
-                    atomicNumber = 0;
-                    symbol = "";
-                    name = "";
-                    weight = 0;
-                }
-
-                input = br.readLine();
+        for (ElementBinding eb : list) {
+            Element e = eb.getElement();
+            if (logger.isDebugEnabled()) {
+                types.add(e.getType());
             }
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            if (e.getType() == Type.LANTHANIDE) {
+                lanthanides.add(e);
+                continue;
+            } else if (e.getType() == Type.ACTINIDE) {
+                actinides.add(e);
+                continue;
+            }
+            int row = e.getDisplayRow() - 1;
+
+            if (row >= table.size()) {
+                table.add(new ArrayList<Element>());
+            }
+            table.get(row).add(e);
+        }
+
+        table.add(lanthanides);
+        table.add(actinides);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(StringUtils.join(types, ","));
         }
     }
 
-    private void insertElement(Element e) {
-        int previousSum = 0;
-        for (int i = 1; i < e.getPeriod(); i++) {
-            previousSum += ELEMENTS_PER_PERIOD[i - 1];
-        }
-        int pos = e.getAtomicNumber() - previousSum - 1;
-        table[e.getPeriod() - 1][pos] = e;
-
-    }
-
-    public Element[][] getTable() {
-        return table;
+    public List<List<Element>> getTable() {
+        return unmodifiableTable;
     }
 }

@@ -8,16 +8,21 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
+import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.shigglewitz.game.Utils;
 import org.shigglewitz.game.config.Sprite;
 import org.shigglewitz.game.entity.Animation;
 import org.shigglewitz.game.entity.chemistry.Element;
+import org.shigglewitz.game.entity.chemistry.Element.Type;
 import org.shigglewitz.game.entity.chemistry.PeriodicTable;
 import org.shigglewitz.game.state.GameState;
 import org.shigglewitz.game.state.GameStateManager;
 
 public class PeriodicTableState extends GameState {
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private static final NumberFormat ATOMIC_MASS_FORMAT = NumberFormat
             .getInstance();
@@ -49,6 +54,7 @@ public class PeriodicTableState extends GameState {
     private Element selectedElement;
     private int selectedElementRow;
     private int selectedElementCol;
+    private Composite alphaComposite;
     private Animation flashing;
 
     public PeriodicTableState(GameStateManager gsm) {
@@ -71,8 +77,9 @@ public class PeriodicTableState extends GameState {
         flashing = new Animation();
         flashing.setFrames(resources.requestSprite(Sprite.FLASHING));
         flashing.setDelay(Sprite.FLASHING.getDelay());
+        alphaComposite = Utils.makeComposite((float) 0.25);
 
-        selectedElementRow = 1;
+        selectedElementRow = 0;
         selectedElementCol = 0;
         findSelectedElement();
 
@@ -80,11 +87,12 @@ public class PeriodicTableState extends GameState {
     }
 
     protected void findSelectedElement() {
-        System.out.println("Seeking: (" + selectedElementRow + ","
+        logger.debug("Seeking: (" + selectedElementRow + ","
                 + selectedElementCol + ")");
-        selectedElement = pt.getTable()[selectedElementRow][selectedElementCol];
+        selectedElement = pt.getTable().get(selectedElementRow)
+                .get(selectedElementCol);
         flashing.setFrame(0);
-        System.out.println("Found " + selectedElement.getName());
+        logger.debug("Found " + selectedElement.getName());
     }
 
     @Override
@@ -93,10 +101,10 @@ public class PeriodicTableState extends GameState {
         elementWidth = config.getWidth() / 19;
         // one cell of padding on each side, with half a cell of padding on each
         // side of rare earth elements
-        elementHeight = config.getHeight() / (PeriodicTable.NUM_PERIODS + 3);
+        elementHeight = config.getHeight() / (pt.getTable().size() + 3);
 
         // make this based on size
-        elementSymbolFont = new Font("Gothic", Font.BOLD, 24);
+        elementSymbolFont = new Font("Gothic", Font.BOLD, 20);
         elementInformationFont = new Font("Arial", Font.PLAIN, 10);
         elementAtomicNumberFont = new Font("Arial", Font.PLAIN, 14);
 
@@ -138,47 +146,61 @@ public class PeriodicTableState extends GameState {
     };
 
     protected void scrollSelectedHorizontal(boolean left) {
+        int elementsInRow = pt.getTable().get(selectedElementRow).size();
         if (left) {
-            selectedElementCol--;
+            selectedElementCol = Utils.decrementAndWrap(selectedElementCol,
+                    elementsInRow);
         } else {
-            selectedElementCol++;
-        }
-
-        int elementsInRow = pt.getTable()[selectedElementRow].length;
-        if (selectedElementCol >= elementsInRow) {
-            selectedElementCol = 0;
-        } else if (selectedElementCol < 0) {
-            selectedElementCol = elementsInRow - 1;
+            selectedElementCol = Utils.incrementAndWrap(selectedElementCol,
+                    elementsInRow);
         }
 
         findSelectedElement();
     }
 
     protected void scrollSelectedVertical(boolean up) {
+        int numPeriods = pt.getTable().size();
         int previousRow = selectedElementRow;
+
         if (up) {
-            selectedElementRow--;
+            selectedElementRow = Utils.decrementAndWrap(selectedElementRow,
+                    numPeriods);
         } else {
-            selectedElementRow++;
+            selectedElementRow = Utils.incrementAndWrap(selectedElementRow,
+                    numPeriods);
         }
 
-        int numPeriods = pt.getTable().length;
-        if (selectedElementRow >= numPeriods) {
-            selectedElementRow = 0;
-        } else if (selectedElementRow < 0) {
-            selectedElementRow = numPeriods - 1;
-        }
-
-        if (pt.getTable()[previousRow].length != pt.getTable()[selectedElementRow].length) {
-            selectedElementCol = findClosestFamily(selectedElementCol,
-                    selectedElementRow);
+        if (pt.getTable().get(previousRow).size() != pt.getTable()
+                .get(selectedElementRow).size()) {
+            selectedElementCol = findClosestFamily(
+                    selectedElement.getDisplayColumn(), selectedElementRow);
         }
 
         findSelectedElement();
     }
 
-    protected int findClosestFamily(int previousFamily, int period) {
-        return 0;
+    protected int findClosestFamily(int previousDisplayColumn, int period) {
+        int closest = -1;
+        int minDifference = 100;
+        int difference = 0;
+        int absDifference = 0;
+
+        for (int i = 0; i < pt.getTable().get(period).size(); i++) {
+            Element e = pt.getTable().get(period).get(i);
+            difference = e.getDisplayColumn() - previousDisplayColumn;
+            absDifference = Math.abs(difference);
+
+            if (absDifference < minDifference) {
+                minDifference = absDifference;
+                closest = i;
+            }
+
+            if (difference >= 0) {
+                break;
+            }
+        }
+
+        return closest;
     }
 
     protected void selectElement() {
@@ -211,7 +233,7 @@ public class PeriodicTableState extends GameState {
 
     protected void drawOutlines(Graphics2D g) {
 
-        for (Element[] period : pt.getTable()) {
+        for (List<Element> period : pt.getTable()) {
             for (Element e : period) {
                 if (e == null) {
                     continue;
@@ -231,7 +253,7 @@ public class PeriodicTableState extends GameState {
         g.setColor(elementAtomicNumberColor);
         g.setFont(elementAtomicNumberFont);
 
-        for (Element[] period : pt.getTable()) {
+        for (List<Element> period : pt.getTable()) {
             for (Element e : period) {
                 if (e == null) {
                     continue;
@@ -247,7 +269,7 @@ public class PeriodicTableState extends GameState {
     protected void drawSymbols(Graphics2D g) {
         g.setColor(elementSymbolColor);
         g.setFont(elementSymbolFont);
-        for (Element[] period : pt.getTable()) {
+        for (List<Element> period : pt.getTable()) {
             for (Element e : period) {
                 if (e == null) {
                     continue;
@@ -262,13 +284,13 @@ public class PeriodicTableState extends GameState {
     protected void drawInformation(Graphics2D g) {
         g.setColor(elementInformationColor);
         g.setFont(elementInformationFont);
-        for (Element[] period : pt.getTable()) {
+        for (List<Element> period : pt.getTable()) {
             for (Element e : period) {
                 if (e == null) {
                     continue;
                 }
                 g.drawString(
-                        ATOMIC_MASS_FORMAT.format(e.getWeight()),
+                        ATOMIC_MASS_FORMAT.format(e.getAtomicWeight()),
                         calculateHorizontalOffset(e) + HORIZONTAL_PIXEL_PADDING,
                         calculateVerticalOffset(e) + atomicMassOffset);
             }
@@ -277,7 +299,7 @@ public class PeriodicTableState extends GameState {
 
     protected void drawSelected(Graphics2D g) {
         Composite originalComposite = g.getComposite();
-        g.setComposite(Utils.makeComposite((float) 0.25));
+        g.setComposite(alphaComposite);
         g.drawImage(flashing.getImage(),
                 calculateHorizontalOffset(selectedElement),
                 calculateVerticalOffset(selectedElement), elementWidth,
@@ -286,11 +308,15 @@ public class PeriodicTableState extends GameState {
     }
 
     protected int calculateHorizontalOffset(Element e) {
-        return (e.getFamily() - 1) * elementWidth
+        return (e.getDisplayColumn() - 1) * elementWidth
                 + ((config.getWidth() - 18 * elementWidth) / 2);
     }
 
     protected int calculateVerticalOffset(Element e) {
-        return e.getPeriod() * elementHeight;
+        double additionalOffset = 0.0;
+        if (e.getType() == Type.LANTHANIDE || e.getType() == Type.ACTINIDE) {
+            additionalOffset = 0.5;
+        }
+        return (int) ((e.getDisplayRow() + additionalOffset) * elementHeight);
     }
 }

@@ -26,15 +26,11 @@ public class MenuState extends GameState {
         private static MenuOption[] vals = values();
 
         public MenuOption next() {
-            return vals[(this.ordinal() + 1) % vals.length];
+            return vals[Utils.incrementAndWrap(this.ordinal(), vals.length)];
         }
 
         public MenuOption previous() {
-            int previous = (this.ordinal() - 1);
-            if (previous < 0) {
-                previous = vals.length - 1;
-            }
-            return vals[previous];
+            return vals[Utils.decrementAndWrap(this.ordinal(), vals.length)];
         }
     }
 
@@ -135,6 +131,9 @@ public class MenuState extends GameState {
             // fall through
         case KeyEvent.VK_SPACE:
             activateMenu();
+            break;
+        case KeyEvent.VK_ESCAPE:
+            exit();
             break;
         }
     }
