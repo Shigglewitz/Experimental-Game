@@ -3,6 +3,7 @@ package org.shigglewitz.game;
 import java.awt.AlphaComposite;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -73,4 +74,34 @@ public class Utils {
         return s;
     }
 
+    public static Point shiftPoint(Point p, Direction d, int magnitude) {
+        return shiftPoint(p.x, p.y, d, magnitude);
+    }
+
+    public static Point shiftPoint(int x, int y, Direction d, int magnitude) {
+        int dx = 0;
+        int dy = 0;
+
+        switch (d) {
+        case UP:
+            dy = -1;
+            break;
+        case DOWN:
+            dy = 1;
+            break;
+        case LEFT:
+            dx = -1;
+            break;
+        case RIGHT:
+            dx = 1;
+            break;
+        default:
+            break;
+        }
+
+        dx *= magnitude;
+        dy *= magnitude;
+
+        return new Point(x + dx, y + dy);
+    }
 }
