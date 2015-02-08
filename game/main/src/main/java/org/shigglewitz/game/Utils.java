@@ -3,6 +3,9 @@ package org.shigglewitz.game;
 import java.awt.AlphaComposite;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 public class Utils {
@@ -56,4 +59,18 @@ public class Utils {
             return initial - 1;
         }
     }
+
+    public static void normalizeGraphics(Graphics2D g) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+    }
+
+    public static Shape rotateShape(Shape s, double theta) {
+        AffineTransform afx = new AffineTransform();
+        afx.rotate(theta, s.getBounds().getCenterX(), s.getBounds()
+                .getCenterY());
+        s = afx.createTransformedShape(s);
+        return s;
+    }
+
 }

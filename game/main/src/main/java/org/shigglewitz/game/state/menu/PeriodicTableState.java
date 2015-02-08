@@ -94,6 +94,8 @@ public class PeriodicTableState extends GameState {
     private Color nucleusDisplayProtonColor;
     private Color nucleusDisplayNeutronColor;
     private Color nucleusDisplayBorderColor;
+    private Color nucleusElectronColor;
+    private Color nucleusElectronBorderColor;
     private Element nucleusDisplayHorizontalAnchor;
     private Element nucleusDisplayVerticalAnchor;
     private NucleusAnimation nucleusAnimation;
@@ -137,6 +139,8 @@ public class PeriodicTableState extends GameState {
                         .getGreen()) / 2,
                 (nucleusDisplayProtonColor.getBlue() + nucleusDisplayNeutronColor
                         .getBlue()) / 2);
+        nucleusElectronColor = Color.GREEN;
+        nucleusElectronBorderColor = Color.BLACK;
         // Hydrogen
         nucleusDisplayVerticalAnchor = pt.getTable().get(0).get(0);
         // Iron
@@ -146,7 +150,8 @@ public class PeriodicTableState extends GameState {
         nucleusAnimation = new NucleusAnimation(250, nucleusDisplayWidth,
                 nucleusDisplayHeight, selectedElement,
                 nucleusDisplayProtonColor, nucleusDisplayNeutronColor,
-                nucleusDisplayBorderColor, nucleusDisplayScatterSize,
+                nucleusDisplayBorderColor, nucleusElectronColor,
+                nucleusElectronBorderColor, nucleusDisplayScatterSize,
                 nucleusDisplayParticleSize);
 
         selectedElementRow = 0;
@@ -257,18 +262,37 @@ public class PeriodicTableState extends GameState {
 
     protected void scrollSelectedHorizontal(boolean left) {
         int elementsInRow = pt.getTable().get(selectedElementRow).size();
+        int numPeriods = pt.getTable().size();
+        int newCol = selectedElementCol;
         if (left) {
-            selectedElementCol = Utils.decrementAndWrap(selectedElementCol,
-                    elementsInRow);
+            newCol--;
         } else {
-            selectedElementCol = Utils.incrementAndWrap(selectedElementCol,
-                    elementsInRow);
+            newCol++;
+        }
+
+        if (newCol < 0) {
+            selectedElementCol = elementsInRow - 1;
+            selectedElementRow = Utils.decrementAndWrap(selectedElementRow,
+                    numPeriods);
+            selectedElementCol = findClosestFamily(18, selectedElementRow);
+        } else if (newCol >= elementsInRow) {
+            selectedElementCol = 0;
+            selectedElementRow = Utils.incrementAndWrap(selectedElementRow,
+                    numPeriods);
+        } else {
+            selectedElementCol = newCol;
         }
 
         findSelectedElement();
     }
 
     protected void scrollSelectedVertical(boolean up) {
+        changeVerticalSelection(up);
+
+        findSelectedElement();
+    }
+
+    protected void changeVerticalSelection(boolean up) {
         int numPeriods = pt.getTable().size();
         int previousRow = selectedElementRow;
 
@@ -285,8 +309,6 @@ public class PeriodicTableState extends GameState {
             selectedElementCol = findClosestFamily(selectedElement
                     .getDisplayColumn(), selectedElementRow);
         }
-
-        findSelectedElement();
     }
 
     protected int findClosestFamily(int previousDisplayColumn, int period) {
