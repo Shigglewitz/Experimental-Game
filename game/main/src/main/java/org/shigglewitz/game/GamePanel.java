@@ -7,11 +7,14 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JPanel;
 
 import org.shigglewitz.game.config.Config;
+import org.shigglewitz.game.state.GameState;
 import org.shigglewitz.game.state.GameStateManager;
+import org.shigglewitz.game.state.StateEnum;
 import org.shigglewitz.game.state.menu.MenuState;
 
 public class GamePanel extends JPanel implements Runnable, KeyListener,
@@ -24,8 +27,9 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
     private Graphics2D g;
     private BufferedImage image;
     private GameStateManager gsm;
+    private StateEnum startingState;
 
-    public GamePanel() {
+    public GamePanel(StateEnum startingState) {
         super();
 
         config = Config.getConfig();
@@ -34,6 +38,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
                 config.getHeight() * config.getScale()));
         setFocusable(true);
         this.requestFocus();
+        this.startingState = startingState;
     }
 
     @Override
@@ -55,7 +60,18 @@ public class GamePanel extends JPanel implements Runnable, KeyListener,
         running = true;
         gsm = new GameStateManager();
 
-        gsm.push(new MenuState(gsm));
+        GameState initial = null;
+
+        try {
+            initial = startingState.getStateClass().getConstructor(
+                    GameStateManager.class).newInstance(gsm);
+        } catch (InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+            initial = new MenuState(gsm);
+        }
+        gsm.push(initial);
     }
 
     @Override
