@@ -14,22 +14,39 @@ import java.util.Set;
 
 import org.shigglewitz.game.Direction;
 import org.shigglewitz.game.Utils;
-import org.shigglewitz.game.level.Tile.Type;
+import org.shigglewitz.game.level.tilemap.Tile;
+import org.shigglewitz.game.level.tilemap.Tile.Type;
+import org.shigglewitz.game.level.tilemap.TileMap;
 
-public class Stage {
+public class StageBuilder {
     private static final int STARTING_REGION_NUMBER = 1;
+    public static final int DEFAULT_NUM_ROOM_ATTEMPTS = 100;
+    public static final int DEFAULT_WINDING_PERCENT = 50;
+    public static final int DEFAULT_EXTRA_CONNECTOR_CHANCE = 20;
 
     private int width;
     private int height;
+    private int extraSize;
     private int numRoomAttempts;
     private int windingPercent;
     private int extraConnectorChance;
     private int currentRegion;
     private Random random;
-    private Tile[][] tiles;
+    private TileMap tileMap;
     private List<Rectangle> rooms;
 
-    public Stage(int width, int height, int numRoomAttempts) {
+    public static TileMap generateTileMap(int width, int height) {
+        return generateTileMap(width, height, calculateExtraSizeFromDimentions(
+                width, height), DEFAULT_NUM_ROOM_ATTEMPTS,
+                DEFAULT_WINDING_PERCENT, DEFAULT_EXTRA_CONNECTOR_CHANCE);
+    }
+
+    protected static int calculateExtraSizeFromDimentions(int width, int height) {
+        return (int) Math.log10(width * height);
+    }
+
+    public static TileMap generateTileMap(int width, int height, int extraSize,
+            int numRoomAttempts, int windingPercent, int extraConnectorChance) {
         if (width % 2 == 0) {
             width++;
         }
@@ -37,11 +54,20 @@ public class Stage {
             height++;
         }
 
+        StageBuilder stage = new StageBuilder(width, height, extraSize,
+                numRoomAttempts, windingPercent, extraConnectorChance);
+        stage.tileMap.debugMap();
+        return stage.tileMap;
+    }
+
+    private StageBuilder(int width, int height, int extraSize,
+            int numRoomAttempts, int windingPercent, int extraConnectorChance) {
         this.width = width;
         this.height = height;
+        this.extraSize = extraSize;
         this.numRoomAttempts = numRoomAttempts;
-        windingPercent = 50;
-        extraConnectorChance = 20;
+        this.windingPercent = windingPercent;
+        this.extraConnectorChance = extraConnectorChance;
         currentRegion = STARTING_REGION_NUMBER - 1;
         random = new Random();
 
@@ -49,7 +75,7 @@ public class Stage {
     }
 
     protected void init() {
-        tiles = new Tile[width][height];
+        tileMap = new TileMap(30, width, height);
         rooms = new ArrayList<>();
 
         fill(Type.WALL);
@@ -61,9 +87,9 @@ public class Stage {
     }
 
     protected void fill(Type type) {
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                tiles[i][j] = new Tile(type);
+        for (int i = 0; i < tileMap.getNumCols(); i++) {
+            for (int j = 0; j < tileMap.getNumRows(); j++) {
+                tileMap.setTile(i, j, new Tile(type));
             }
         }
     }
@@ -76,7 +102,7 @@ public class Stage {
     }
 
     protected Rectangle generateRoom() {
-        int size = (random.nextInt(3) + 1) * 2 + 1;
+        int size = (random.nextInt(3 + extraSize) + 1) * 2 + 1;
         int rectangularity = random.nextInt(1 + size / 2) * 2;
         int width = size;
         int height = size;
@@ -127,18 +153,18 @@ public class Stage {
     }
 
     protected void excavate(int x, int y) {
-        tiles[x][y].setType(Type.FLOOR);
-        tiles[x][y].setRegion(currentRegion);
+        tileMap.changeType(x, y, Type.FLOOR);
+        tileMap.setRegion(x, y, currentRegion);
     }
 
     protected void fill(int x, int y) {
-        tiles[x][y].setType(Type.WALL);
+        tileMap.changeType(x, y, Type.WALL);
     }
 
     protected void generateMaze() {
         for (int i = 1; i < width - 1; i += 2) {
             for (int j = 1; j < height - 1; j += 2) {
-                if (tiles[i][j].getType() == Type.WALL) {
+                if (tileMap.getType(i, j) == Type.WALL) {
                     growMaze(i, j);
                 }
             }
@@ -195,7 +221,7 @@ public class Stage {
         }
 
         shift = Utils.shiftPoint(p, d, 2);
-        return tiles[shift.x][shift.y].getType() == Type.WALL;
+        return tileMap.getType(shift.x, shift.y) == Type.WALL;
     }
 
     protected void connectRegions() {
@@ -258,11 +284,11 @@ public class Stage {
     protected void findConnectors(Map<Point, Set<Integer>> connectorRegions) {
         for (int i = 1; i < width - 1; i++) {
             for (int j = 1; j < height - 1; j++) {
-                if (tiles[i][j].getType() == Type.WALL) {
+                if (tileMap.getType(i, j) == Type.WALL) {
                     Set<Integer> regions = new HashSet<>();
                     for (Direction d : Direction.CARDINAL) {
                         Point neighbor = Utils.shiftPoint(i, j, d, 1);
-                        int region = tiles[neighbor.x][neighbor.y].getRegion();
+                        int region = tileMap.getRegion(neighbor.x, neighbor.y);
                         if (region > -1) {
                             regions.add(region);
                         }
@@ -277,7 +303,7 @@ public class Stage {
     }
 
     protected void addJunction(Point p) {
-        tiles[p.x][p.y].setType(Type.DOOR);
+        tileMap.changeType(p.x, p.y, Type.DOOR);
     }
 
     protected void removeDeadEnds() {
@@ -285,7 +311,7 @@ public class Stage {
 
         for (int i = 1; i < width - 1; i++) {
             for (int j = 1; j < height - 1; j++) {
-                if (tiles[i][j].getType() != Type.WALL) {
+                if (tileMap.getType(i, j) != Type.WALL) {
                     Point curr = new Point(i, j);
                     int exits = countExits(curr);
 
@@ -303,7 +329,7 @@ public class Stage {
                 fill(curr.x, curr.y);
                 for (Direction d : Direction.CARDINAL) {
                     Point neighbor = Utils.shiftPoint(curr, d, 1);
-                    if (tiles[neighbor.x][neighbor.y].getType() != Type.WALL) {
+                    if (tileMap.getType(neighbor.x, neighbor.y) != Type.WALL) {
                         deadEnds.add(neighbor);
                     }
                 }
@@ -316,7 +342,7 @@ public class Stage {
 
         for (Direction d : Direction.CARDINAL) {
             Point neighbor = Utils.shiftPoint(p, d, 1);
-            if (tiles[neighbor.x][neighbor.y].getType() != Type.WALL) {
+            if (tileMap.getType(neighbor.x, neighbor.y) != Type.WALL) {
                 exits++;
             }
         }
@@ -326,9 +352,5 @@ public class Stage {
 
     protected void startRegion() {
         currentRegion++;
-    }
-
-    public Tile[][] getTiles() {
-        return tiles;
     }
 }

@@ -1,4 +1,4 @@
-package org.shigglewitz.game.level;
+package org.shigglewitz.game.level.tilemap;
 
 public class Tile {
     public static enum Type {
