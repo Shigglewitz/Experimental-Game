@@ -2,7 +2,7 @@ package org.shigglewitz.game.config;
 
 import java.awt.Color;
 
-import org.shigglewitz.game.level.Tile;
+import org.shigglewitz.game.level.tilemap.Tile;
 
 public class Config {
     private Config() {}
@@ -12,6 +12,10 @@ public class Config {
     public static Config getConfig() {
         return CONFIG;
     }
+
+    public static final String BACKGROUND_FOLDER = "/backgrounds/";
+    public static final String GRASS_BACKGROUND = BACKGROUND_FOLDER
+            + "grassbg1.gif";
 
     private String windowTitle = "Window Title";
     private int width = 800;
