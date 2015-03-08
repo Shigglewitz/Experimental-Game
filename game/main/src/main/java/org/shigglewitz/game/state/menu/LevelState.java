@@ -23,8 +23,10 @@ public class LevelState extends GameState {
     private int stageHeight;
     private Player player;
 
-    public LevelState(GameStateManager gsm) {
+    public LevelState(GameStateManager gsm, Player p) {
         super(gsm);
+
+        player = p;
 
         init();
     }
@@ -40,6 +42,7 @@ public class LevelState extends GameState {
     public void draw(Graphics2D g) {
         bg.draw(g);
         tm.draw(g);
+        player.draw(g);
     }
 
     @Override
@@ -53,7 +56,6 @@ public class LevelState extends GameState {
         bgColor = Color.LIGHT_GRAY;
         stageWidth = 80;
         stageHeight = 60;
-        player = new Player();
 
         bg = new MonochromaticBackground(bgColor, 0.1);
         bg = new SpriteBackground(Config.GRASS_BACKGROUND, 0.1);

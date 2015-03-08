@@ -15,6 +15,7 @@ import org.shigglewitz.game.Utils;
 import org.shigglewitz.game.config.Sprite;
 import org.shigglewitz.game.entity.Animation;
 import org.shigglewitz.game.entity.NucleusAnimation;
+import org.shigglewitz.game.entity.Player;
 import org.shigglewitz.game.entity.SpriteAnimation;
 import org.shigglewitz.game.entity.chemistry.Element;
 import org.shigglewitz.game.entity.chemistry.Element.Type;
@@ -107,7 +108,7 @@ public class PeriodicTableState extends GameState {
 
     @Override
     protected void init() {
-        pt = new PeriodicTable();
+        pt = PeriodicTable.getInstance();
 
         bgColor = Color.DARK_GRAY;
         elementOutlineColor = Color.BLACK;
@@ -332,7 +333,8 @@ public class PeriodicTableState extends GameState {
     }
 
     protected void selectElement() {
-        System.out.println("Selected: " + selectedElement.getName() + "!");
+        Player p = new Player(nucleusAnimation);
+        gsm.push(new LevelState(gsm, p));
     }
 
     @Override

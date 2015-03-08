@@ -1,5 +1,7 @@
 package org.shigglewitz.game.entity;
 
+import java.awt.Graphics2D;
+
 public class Player {
     private double x;
     private double y;
@@ -15,7 +17,9 @@ public class Player {
     private double dx;
     private double dy;
 
-    public Player() {
+    private Animation animation;
+
+    public Player(Animation animation) {
         x = 0;
         y = 0;
 
@@ -29,6 +33,8 @@ public class Player {
         dx = 0;
         dy = 0;
         maxSpeed = 4;
+
+        this.animation = animation;
     }
 
     public double getX() {
@@ -109,5 +115,10 @@ public class Player {
         accelerate();
         x += dx;
         y += dy;
+        animation.update();
+    }
+
+    public void draw(Graphics2D g) {
+        g.drawImage(animation.getImage(), (int) x, (int) y, null);
     }
 }

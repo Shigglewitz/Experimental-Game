@@ -151,7 +151,6 @@ public class NucleusAnimation extends Animation {
     }
 
     protected void drawTopHat(Graphics2D g) {
-        System.out.println(scatterSize);
         int x = width / 2 - particleSize / 2;
         int y = height / 2 - particleSize / 2;
         Shape crown = new RoundRectangle2D.Double(x - (5 * scatterSize / 4), y

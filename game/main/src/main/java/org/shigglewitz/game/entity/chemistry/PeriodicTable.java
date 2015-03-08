@@ -16,7 +16,13 @@ public class PeriodicTable {
     private List<List<Element>> table;
     private List<List<Element>> unmodifiableTable;
 
-    public PeriodicTable() {
+    private static PeriodicTable INSTANCE = new PeriodicTable();
+
+    public static PeriodicTable getInstance() {
+        return INSTANCE;
+    }
+
+    private PeriodicTable() {
         table = new ArrayList<>();
         readProperties();
         writeProtectTable();

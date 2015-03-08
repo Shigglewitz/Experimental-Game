@@ -18,7 +18,7 @@ public class Main {
         }
 
         if (startingState == null) {
-            startingState = StateEnum.LEVEL;
+            startingState = StateEnum.MENU;
         }
 
         Main main = new Main();
