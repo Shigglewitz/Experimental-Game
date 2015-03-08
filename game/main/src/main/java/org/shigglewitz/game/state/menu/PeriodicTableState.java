@@ -6,7 +6,6 @@ import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -233,32 +232,29 @@ public class PeriodicTableState extends GameState {
     }
 
     @Override
-    protected void keyPressed(int k) {
-        super.keyPressed(k);
+    protected void pressLeft() {
+        scrollSelectedHorizontal(true);
+    }
 
-        switch (k) {
-        case KeyEvent.VK_ESCAPE:
-            exit();
-            break;
-        case KeyEvent.VK_LEFT:
-            scrollSelectedHorizontal(true);
-            break;
-        case KeyEvent.VK_RIGHT:
-            scrollSelectedHorizontal(false);
-            break;
-        case KeyEvent.VK_UP:
-            scrollSelectedVertical(true);
-            break;
-        case KeyEvent.VK_DOWN:
-            scrollSelectedVertical(false);
-            break;
-        case KeyEvent.VK_SPACE:
-            // fall through
-        case KeyEvent.VK_ENTER:
-            selectElement();
-            break;
-        }
-    };
+    @Override
+    protected void pressRight() {
+        scrollSelectedHorizontal(false);
+    }
+
+    @Override
+    protected void pressUp() {
+        scrollSelectedVertical(true);
+    }
+
+    @Override
+    protected void pressDown() {
+        scrollSelectedVertical(false);
+    }
+
+    @Override
+    protected void pressSelect() {
+        selectElement();
+    }
 
     protected void scrollSelectedHorizontal(boolean left) {
         int elementsInRow = pt.getTable().get(selectedElementRow).size();
@@ -339,6 +335,7 @@ public class PeriodicTableState extends GameState {
         System.out.println("Selected: " + selectedElement.getName() + "!");
     }
 
+    @Override
     protected void exit() {
         gsm.pop();
     }

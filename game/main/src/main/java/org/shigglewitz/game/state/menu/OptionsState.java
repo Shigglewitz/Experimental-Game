@@ -87,26 +87,8 @@ public class OptionsState extends GameState {
 
     @Override
     protected void keyPressed(int k) {
-        super.keyPressed(k);
-
         if (activeOption < 0) {
-            switch (k) {
-            case KeyEvent.VK_DOWN:
-                incrementSelected();
-                break;
-            case KeyEvent.VK_UP:
-                decrementSelected();
-                break;
-            case KeyEvent.VK_ENTER:
-                // fall through
-            case KeyEvent.VK_SPACE:
-                activeOption = selectedOption;
-                selectedOption = -1;
-                break;
-            case KeyEvent.VK_ESCAPE:
-                exit();
-                break;
-            }
+            super.keyPressed(k);
         } else {
             options.get(activeOption).setKey(k);
             selectedOption = activeOption;
@@ -114,16 +96,22 @@ public class OptionsState extends GameState {
         }
     }
 
-    protected void incrementSelected() {
+    @Override
+    protected void pressDown() {
+        // increment selected
         selectedOption = Utils.incrementAndWrap(selectedOption, options.size());
     }
 
-    protected void decrementSelected() {
+    @Override
+    protected void pressUp() {
+        // decrement selected
         selectedOption = Utils.decrementAndWrap(selectedOption, options.size());
     }
 
-    protected void exit() {
-        gsm.pop();
+    @Override
+    protected void pressSelect() {
+        activeOption = selectedOption;
+        selectedOption = -1;
     }
 
     public static class Option {

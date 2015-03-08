@@ -62,21 +62,23 @@ public class LevelState extends GameState {
     }
 
     @Override
-    protected void keyPressed(int k) {
-        super.keyPressed(k);
+    protected void pressLeft() {
+        player.setLeft(true);
+    }
 
-        if (k == Control.MOVE_LEFT.getKey()) {
-            player.setLeft(true);
-        }
-        if (k == Control.MOVE_RIGHT.getKey()) {
-            player.setRight(true);
-        }
-        if (k == Control.MOVE_UP.getKey()) {
-            player.setUp(true);
-        }
-        if (k == Control.MOVE_DOWN.getKey()) {
-            player.setDown(true);
-        }
+    @Override
+    protected void pressRight() {
+        player.setRight(true);
+    }
+
+    @Override
+    protected void pressUp() {
+        player.setUp(true);
+    }
+
+    @Override
+    protected void pressDown() {
+        player.setDown(true);
     }
 
     @Override

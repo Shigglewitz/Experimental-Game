@@ -3,7 +3,6 @@ package org.shigglewitz.game.state.menu;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
 
 import org.shigglewitz.game.Utils;
 import org.shigglewitz.game.state.GameState;
@@ -120,36 +119,19 @@ public class MenuState extends GameState {
     }
 
     @Override
-    protected void keyPressed(int k) {
-        super.keyPressed(k);
-
-        switch (k) {
-        case KeyEvent.VK_UP:
-            decrementMenu();
-            break;
-        case KeyEvent.VK_DOWN:
-            incrementMenu();
-            break;
-        case KeyEvent.VK_ENTER:
-            // fall through
-        case KeyEvent.VK_SPACE:
-            activateMenu();
-            break;
-        case KeyEvent.VK_ESCAPE:
-            exit();
-            break;
-        }
-    }
-
-    protected void incrementMenu() {
+    protected void pressDown() {
+        // increment menu
         selected = selected.next();
     }
 
-    protected void decrementMenu() {
+    @Override
+    protected void pressUp() {
+        // decrement menu
         selected = selected.previous();
     }
 
-    protected void activateMenu() {
+    @Override
+    protected void pressSelect() {
         switch (selected) {
         case START:
             start();
@@ -178,6 +160,7 @@ public class MenuState extends GameState {
         gsm.push(new OptionsState(gsm));
     }
 
+    @Override
     protected void exit() {
         System.exit(0);
     }
