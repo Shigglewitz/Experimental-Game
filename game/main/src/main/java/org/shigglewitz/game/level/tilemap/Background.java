@@ -36,12 +36,22 @@ public abstract class Background {
     }
 
     public void draw(Graphics2D g) {
-        g.drawImage(image, (int) x, (int) y, null);
+        g.drawImage(image, (int) -x, (int) -y, null);
 
         if (x < 0) {
-            g.drawImage(image, (int) x + config.getWidth(), (int) y, null);
+            g.drawImage(image, (int) x + config.getWidth(), (int) -y, null);
         } else if (x > 0) {
-            g.drawImage(image, (int) x - config.getHeight(), (int) y, null);
+            g.drawImage(image, config.getWidth() - (int) x, (int) -y, null);
+        }
+        if (y < 0) {
+            g.drawImage(image, (int) -x, (int) y + config.getHeight(), null);
+        } else if (y > 0) {
+            g.drawImage(image, (int) -x, config.getHeight() - (int) y, null);
+        }
+
+        if (x > 0 && y > 0) {
+            g.drawImage(image, config.getWidth() - (int) x, config.getHeight()
+                    - (int) y, null);
         }
     }
 

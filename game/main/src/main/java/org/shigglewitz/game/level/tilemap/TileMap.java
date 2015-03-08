@@ -155,8 +155,8 @@ public class TileMap implements Configurable {
 
         fixBounds();
 
-        colOffset = (int) -this.x / tileSize;
-        rowOffset = (int) -this.y / tileSize;
+        colOffset = (int) this.x / tileSize;
+        rowOffset = (int) this.y / tileSize;
     }
 
     private void fixBounds() {
@@ -188,8 +188,8 @@ public class TileMap implements Configurable {
                     if (drawFloors
                             || map[col][row].getType() != Tile.Type.FLOOR) {
                         g.setColor(config.getFillColor(map[col][row]));
-                        g.fillRect((int) x + col * tileSize, (int) y + row
-                                * tileSize, tileSize, tileSize);
+                        g.fillRect(col * tileSize - (int) x, row * tileSize
+                                - (int) y, tileSize, tileSize);
                     }
                 }
             }
@@ -200,12 +200,13 @@ public class TileMap implements Configurable {
 
     @Override
     public void configure() {
-        xmin = config.getWidth() - width;
-        xmax = 0;
-        ymin = config.getHeight() - height;
-        ymax = 0;
+        xmin = 0;
+        xmax = width - config.getWidth();
+        ymin = 0;
+        ymax = height - config.getHeight();
 
-        numRowsToDraw = config.getHeight() / tileSize + 2;
-        numColsToDraw = config.getWidth() / tileSize + 2;
+        numRowsToDraw = (int) (Math
+                .ceil((double) config.getHeight() / tileSize) + 2);
+        numColsToDraw = (int) (Math.ceil((double) config.getWidth() / tileSize) + 2);
     }
 }

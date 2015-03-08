@@ -2,9 +2,9 @@ package org.shigglewitz.game.state.menu;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
 
 import org.shigglewitz.game.config.Config;
+import org.shigglewitz.game.config.Control;
 import org.shigglewitz.game.entity.Player;
 import org.shigglewitz.game.level.StageBuilder;
 import org.shigglewitz.game.level.tilemap.Background;
@@ -31,8 +31,7 @@ public class LevelState extends GameState {
 
     @Override
     public void update() {
-        // bg.setPosition(config.getWidth() - player.getX(), config.getHeight()
-        // - player.getY());
+        player.update();
         tm.setPosition(player.getX(), player.getY());
         bg.setPosition(tm.getX(), tm.getY());
     }
@@ -65,19 +64,36 @@ public class LevelState extends GameState {
     @Override
     protected void keyPressed(int k) {
         super.keyPressed(k);
-        switch (k) {
-        case KeyEvent.VK_DOWN:
-            player.move(0, -10);
-            break;
-        case KeyEvent.VK_UP:
-            player.move(0, 10);
-            break;
-        case KeyEvent.VK_LEFT:
-            player.move(10, 0);
-            break;
-        case KeyEvent.VK_RIGHT:
-            player.move(-10, 0);
-            break;
+
+        if (k == Control.MOVE_LEFT.getKey()) {
+            player.setLeft(true);
+        }
+        if (k == Control.MOVE_RIGHT.getKey()) {
+            player.setRight(true);
+        }
+        if (k == Control.MOVE_UP.getKey()) {
+            player.setUp(true);
+        }
+        if (k == Control.MOVE_DOWN.getKey()) {
+            player.setDown(true);
+        }
+    }
+
+    @Override
+    protected void keyReleased(int k) {
+        super.keyReleased(k);
+
+        if (k == Control.MOVE_LEFT.getKey()) {
+            player.setLeft(false);
+        }
+        if (k == Control.MOVE_RIGHT.getKey()) {
+            player.setRight(false);
+        }
+        if (k == Control.MOVE_UP.getKey()) {
+            player.setUp(false);
+        }
+        if (k == Control.MOVE_DOWN.getKey()) {
+            player.setDown(false);
         }
     }
 }
