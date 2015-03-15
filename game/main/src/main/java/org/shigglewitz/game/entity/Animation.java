@@ -7,6 +7,8 @@ public abstract class Animation {
     protected long delay;
     protected BufferedImage[] frames;
     protected int currentFrame;
+    protected int height;
+    protected int width;
 
     protected boolean playedOnce;
 
@@ -39,5 +41,13 @@ public abstract class Animation {
 
     public boolean hasPlayedOnce() {
         return playedOnce;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
     }
 }

@@ -34,7 +34,8 @@ public class LevelState extends GameState {
     @Override
     public void update() {
         player.update();
-        tm.setPosition(player.getX(), player.getY());
+        tm.setPosition(player.getX() - config.getWidth() / 2, player.getY()
+                - config.getHeight() / 2);
         bg.setPosition(tm.getX(), tm.getY());
     }
 
@@ -61,6 +62,8 @@ public class LevelState extends GameState {
         bg = new SpriteBackground(Config.GRASS_BACKGROUND, 0.1);
 
         tm = StageBuilder.generateTileMap(stageWidth, stageHeight);
+
+        player.setTileMap(tm);
     }
 
     @Override

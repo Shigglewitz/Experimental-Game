@@ -88,14 +88,7 @@ public class PeriodicTableState extends GameState {
     private int nucleusDisplayY;
     private int nucleusDisplayWidth;
     private int nucleusDisplayHeight;
-    private int nucleusDisplayParticleSize;
-    private int nucleusDisplayScatterSize;
     private Color nucleusDisplayBackground;
-    private Color nucleusDisplayProtonColor;
-    private Color nucleusDisplayNeutronColor;
-    private Color nucleusDisplayBorderColor;
-    private Color nucleusElectronColor;
-    private Color nucleusElectronBorderColor;
     private Element nucleusDisplayHorizontalAnchor;
     private Element nucleusDisplayVerticalAnchor;
     private NucleusAnimation nucleusAnimation;
@@ -130,29 +123,13 @@ public class PeriodicTableState extends GameState {
         selectedDisplayHorizontalAnchor = pt.getTable().get(3).get(2);
 
         nucleusDisplayBackground = Color.WHITE;
-        nucleusDisplayProtonColor = Color.RED;
-        nucleusDisplayNeutronColor = Color.GRAY;
-        nucleusDisplayBorderColor = new Color(
-                (nucleusDisplayProtonColor.getRed() + nucleusDisplayNeutronColor
-                        .getRed()) / 2,
-                (nucleusDisplayProtonColor.getGreen() + nucleusDisplayNeutronColor
-                        .getGreen()) / 2,
-                (nucleusDisplayProtonColor.getBlue() + nucleusDisplayNeutronColor
-                        .getBlue()) / 2);
-        nucleusElectronColor = Color.GREEN;
-        nucleusElectronBorderColor = Color.BLACK;
         // Hydrogen
         nucleusDisplayVerticalAnchor = pt.getTable().get(0).get(0);
         // Iron
         nucleusDisplayHorizontalAnchor = pt.getTable().get(3).get(7);
 
         configure();
-        nucleusAnimation = new NucleusAnimation(250, nucleusDisplayWidth,
-                nucleusDisplayHeight, selectedElement,
-                nucleusDisplayProtonColor, nucleusDisplayNeutronColor,
-                nucleusDisplayBorderColor, nucleusElectronColor,
-                nucleusElectronBorderColor, nucleusDisplayScatterSize,
-                nucleusDisplayParticleSize);
+        nucleusAnimation = new NucleusAnimation(selectedElement);
 
         selectedElementRow = 0;
         selectedElementCol = 0;
@@ -224,12 +201,6 @@ public class PeriodicTableState extends GameState {
                 - elementHeight / 2;
         nucleusDisplayWidth = elementWidth * 4;
         nucleusDisplayHeight = elementHeight * 3;
-        nucleusDisplayParticleSize = 15;
-        nucleusDisplayScatterSize = 4;
-
-        if (nucleusAnimation != null) {
-            nucleusAnimation.setBaseScatterSize(nucleusDisplayScatterSize);
-        }
     }
 
     @Override
@@ -333,7 +304,7 @@ public class PeriodicTableState extends GameState {
     }
 
     protected void selectElement() {
-        Player p = new Player(nucleusAnimation);
+        Player p = new Player(selectedElement);
         gsm.push(new LevelState(gsm, p));
     }
 

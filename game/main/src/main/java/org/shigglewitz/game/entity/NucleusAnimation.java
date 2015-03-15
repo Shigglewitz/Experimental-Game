@@ -12,20 +12,26 @@ import java.util.Random;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.shigglewitz.game.Utils;
+import org.shigglewitz.game.config.Config;
+import org.shigglewitz.game.config.Configurable;
 import org.shigglewitz.game.entity.chemistry.ElectronConfiguration;
 import org.shigglewitz.game.entity.chemistry.Element;
 import org.shigglewitz.game.entity.chemistry.Element.Type;
 
-public class NucleusAnimation extends Animation {
+public class NucleusAnimation extends Animation implements Configurable {
+    protected Config config = Config.getConfig();
     private Logger logger = LogManager.getLogger(getClass());
 
+    private static final Color PROTON_COLOR = Color.RED;
+    private static final Color NEUTRON_COLOR = Color.GRAY;
+    private static final Color ELECTRON_COLOR = Color.GREEN;
+    private static final Color ELECTRON_BORDER_COLOR = Color.BLACK;
+    private static final int DELAY = 250;
     private static final int NUM_FRAMES = 4;
     final static BasicStroke stroke = new BasicStroke(2.0f);
 
     private int numProtons;
     private int numNeutrons;
-    private int width;
-    private int height;
     private double neutronsPerProton;
     private ElectronConfiguration electronConfiguration;
     private Color protonColor;
@@ -39,41 +45,55 @@ public class NucleusAnimation extends Animation {
     private Random random;
     private boolean isNobleGas;
     private Color topHatColor;
+    private Element element;
 
-    public NucleusAnimation(int delay, int width, int height, Element e,
-            Color protonColor, Color neutronColor, Color borderColor,
-            Color electronColor, Color electronBorderColor,
-            int baseScatterSize, int particleSize) {
+    public NucleusAnimation(Element e) {
         super();
 
-        this.delay = delay;
-        this.width = width;
-        this.height = height;
-        this.protonColor = protonColor;
-        this.neutronColor = neutronColor;
-        this.borderColor = borderColor;
-        this.electronColor = electronColor;
-        this.electronBorderColor = electronBorderColor;
-        this.baseScatterSize = baseScatterSize;
-        this.scatterSize = baseScatterSize;
-        this.particleSize = particleSize;
+        this.delay = DELAY;
+        this.protonColor = PROTON_COLOR;
+        this.neutronColor = NEUTRON_COLOR;
+        this.borderColor = new Color((protonColor.getRed() + neutronColor
+                .getRed()) / 2, (protonColor.getGreen() + neutronColor
+                .getGreen()) / 2, (protonColor.getBlue() + neutronColor
+                .getBlue()) / 2);
+        this.electronColor = ELECTRON_COLOR;
+        this.electronBorderColor = ELECTRON_BORDER_COLOR;
+        this.baseScatterSize = 4;
+        this.scatterSize = this.baseScatterSize;
+        this.particleSize = 15;
         random = new Random();
         frames = new BufferedImage[NUM_FRAMES];
         isNobleGas = false;
         topHatColor = Color.BLACK;
         if (e != null) {
-            changeElement(e);
+            changeElement(e, false);
         }
+        configure();
+    }
+
+    @Override
+    public void configure() {
+        this.width = config.getWidth() / 19 * 4;
+        this.height = config.getHeight() / 12 * 3;
+        reset();
     }
 
     public void changeElement(Element e) {
+        changeElement(e, true);
+    }
+
+    protected void changeElement(Element e, boolean reset) {
+        element = e;
         numProtons = e.getAtomicNumber();
         numNeutrons = (int) e.getAtomicWeight() - numProtons;
         neutronsPerProton = ((double) numNeutrons) / ((double) numProtons);
         scatterSize = (int) (baseScatterSize * Math.log(e.getAtomicWeight()));
         electronConfiguration = e.getElectronConfiguration();
         isNobleGas = e.getType() == Type.NOBLE_GAS;
-        reset();
+        if (reset) {
+            reset();
+        }
     }
 
     @Override
@@ -88,6 +108,11 @@ public class NucleusAnimation extends Animation {
     protected BufferedImage createImage() {
         BufferedImage ret = new BufferedImage(width, height,
                 BufferedImage.TYPE_4BYTE_ABGR);
+
+        if (element == null) {
+            return ret;
+        }
+
         Graphics2D g = ret.createGraphics();
         Utils.normalizeGraphics(g);
 

@@ -2,6 +2,9 @@ package org.shigglewitz.game.entity;
 
 import java.awt.Graphics2D;
 
+import org.shigglewitz.game.entity.chemistry.Element;
+import org.shigglewitz.game.level.tilemap.TileMap;
+
 public class Player {
     private double x;
     private double y;
@@ -16,10 +19,13 @@ public class Player {
     private double maxSpeed;
     private double dx;
     private double dy;
+    private double xmap;
+    private double ymap;
 
     private Animation animation;
+    private TileMap tm;
 
-    public Player(Animation animation) {
+    public Player(Element element) {
         x = 0;
         y = 0;
 
@@ -34,7 +40,11 @@ public class Player {
         dy = 0;
         maxSpeed = 4;
 
-        this.animation = animation;
+        this.animation = new NucleusAnimation(element);
+    }
+
+    public void setTileMap(TileMap tm) {
+        this.tm = tm;
     }
 
     public double getX() {
@@ -119,6 +129,17 @@ public class Player {
     }
 
     public void draw(Graphics2D g) {
-        g.drawImage(animation.getImage(), (int) x, (int) y, null);
+        if (tm != null) {
+            xmap = tm.getX();
+            ymap = tm.getY();
+        } else {
+            xmap = 0;
+            ymap = 0;
+        }
+
+        g.drawImage(animation.getImage(), (int) (x - xmap - animation
+                .getWidth() / 2), (int) (y - ymap - animation.getHeight() / 2),
+                null);
+        // g.drawImage(animation.getImage(), (int) x, (int) y, null);
     }
 }
